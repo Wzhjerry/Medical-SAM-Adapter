@@ -145,12 +145,12 @@ class Multitask(Dataset):
 
                 mask = np.zeros_like(label)
                 mask[label > 0] = 1
-                mask[label_pseudo_odoc == 1] = 2
-                mask[label_pseudo_odoc == 2] = 3
-                mask[label_pseudo_lesion == 1] = 4
-                mask[label_pseudo_lesion == 2] = 5
-                mask[label_pseudo_lesion == 3] = 6
-                mask[label_pseudo_lesion == 4] = 7
+                # mask[label_pseudo_odoc == 1] = 2
+                # mask[label_pseudo_odoc == 2] = 3
+                # mask[label_pseudo_lesion == 1] = 4
+                # mask[label_pseudo_lesion == 2] = 5
+                # mask[label_pseudo_lesion == 3] = 6
+                # mask[label_pseudo_lesion == 4] = 7
                 mask = Image.fromarray(np.uint8(mask))
 
                 return mask
@@ -185,13 +185,13 @@ class Multitask(Dataset):
                 # target_pseudo_lesion = Image.fromarray(np.uint8(label_pseudo_lesion))
 
                 mask = np.zeros_like(label)
-                mask[label == 1] = 2
-                mask[label == 2] = 3
+                # mask[label == 1] = 2
+                # mask[label == 2] = 3
                 mask[label_pseudo_vessel == 1] = 1
-                mask[label_pseudo_lesion == 1] = 4
-                mask[label_pseudo_lesion == 2] = 5
-                mask[label_pseudo_lesion == 3] = 6
-                mask[label_pseudo_lesion == 4] = 7
+                # mask[label_pseudo_lesion == 1] = 4
+                # mask[label_pseudo_lesion == 2] = 5
+                # mask[label_pseudo_lesion == 3] = 6
+                # mask[label_pseudo_lesion == 4] = 7
                 mask = Image.fromarray(np.uint8(mask))
 
                 return mask
@@ -255,13 +255,13 @@ class Multitask(Dataset):
                 # target_pseudo_odoc = Image.fromarray(np.uint8(label_pseudo_odoc))
 
                 mask = np.zeros_like(label)
-                mask[label == 1] = 4
-                mask[label == 2] = 5
-                mask[label == 3] = 6
-                mask[label == 4] = 7
+                # mask[label == 1] = 4
+                # mask[label == 2] = 5
+                # mask[label == 3] = 6
+                # mask[label == 4] = 7
                 mask[label_pseudo_vessel == 1] = 1
-                mask[label_pseudo_odoc == 1] = 2
-                mask[label_pseudo_odoc == 2] = 3
+                # mask[label_pseudo_odoc == 1] = 2
+                # mask[label_pseudo_odoc == 2] = 3
                 mask = Image.fromarray(np.uint8(mask))
 
                 return mask
