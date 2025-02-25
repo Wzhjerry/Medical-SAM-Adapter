@@ -160,7 +160,7 @@ class Multitask(Dataset):
                 return mask
             else:
                 mask = Image.fromarray(np.uint8(label))
-                return 
+                return mask
 
         # Read labels for odoc seg
         elif root_dirs[1] is not None:
@@ -271,7 +271,7 @@ class Multitask(Dataset):
                 return mask
             else:
                 mask = Image.fromarray(np.uint8(label))
-                return 
+                return mask
 
     def read_images(self, root_dir):
         image_paths = []
