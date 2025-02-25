@@ -8,7 +8,7 @@ from PIL import Image
 from torch.utils.data import Dataset
 from tqdm import tqdm
 # from datasets.utils import analyze_name
-from utils import random_box, random_click, build_transform, remove_black_edge
+from utils import random_box, random_click, build_transform, remove_black_edge, random_box
 from sklearn.model_selection import KFold
 from torchvision.transforms import functional as F
 import pandas as pd
@@ -168,6 +168,9 @@ class Multitask(Dataset):
                 # mask[label_pseudo_lesion == 3] = 6
                 # mask[label_pseudo_lesion == 4] = 7
                 mask = Image.fromarray(np.uint8(mask)).convert('L')
+
+                mask_test = np.array(mask)
+                print(np.unique(mask_test))
 
                 return mask
             else:
