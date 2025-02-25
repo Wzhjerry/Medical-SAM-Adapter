@@ -97,7 +97,7 @@ class Multitask(Dataset):
 
         mask_np = mask.numpy() if torch.is_tensor(mask) else np.array(mask)
         # unique_classes = np.unique(mask_np)
-        unique_classes = [0, 1]
+        unique_classes = [1]
         for cls in unique_classes:
             if cls == 0:  # 跳过背景
                 continue
@@ -113,8 +113,8 @@ class Multitask(Dataset):
         return {
             'image': im_t,  # tensor 类型
             'label': target_t,  # 多类别 mask，tensor 类型
-            'p_label': p_label_dict,  # 字典，每个键为类别，值为对应的标签（通常与类别相同）
-            'pt': pt_dict,          # 字典，每个键为类别，值为点击点 [x, y]
+            'p_label': p_label_dict[1],  # 字典，每个键为类别，值为对应的标签（通常与类别相同）
+            'pt': pt_dict[1],          # 字典，每个键为类别，值为点击点 [x, y]
             'image_meta_dict': image_meta_dict,
         }
 
