@@ -68,26 +68,25 @@ class Multitask(Dataset):
         name = self.names[idx]
         # Label
         mask = self.read_labels(self.y[idx], name, ymin, ymax, xmin, xmax, self.split)
-        
+
+        point_label, pt = random_click(mask, point_labels=1)
+
         im = Image.fromarray(np.uint8(image))
+        mask = Image.fromarray(np.uint8(mask)).convert('L')
 
         # Identical transformations for image and ground truth
         seed = np.random.randint(2147483647)
         torch.manual_seed(seed)
         random.seed(seed)
-
-        if self.im_transform is not None:
-            im_t = self.im_transform(im)
-
+        im_t = self.im_transform(im)
         torch.manual_seed(seed)
         random.seed(seed)
-        if self.label_transform is not None:
-            target_t = self.label_transform(mask)
-            torch.manual_seed(seed)
-            random.seed(seed)
+        target_t = self.label_transform(mask)
+        torch.manual_seed(seed)
+        random.seed(seed)
 
         # Convert mask to NumPy array if it’s a tensor
-        mask_np = mask.numpy() if torch.is_tensor(mask) else np.array(mask)
+        
         # Find all unique classes in the mask, excluding background (0)
         # unique_classes = np.unique(mask_np)
         # unique_classes = unique_classes[unique_classes != 0]
@@ -116,8 +115,6 @@ class Multitask(Dataset):
         # pt_tensor = torch.from_numpy(pt_array).to(dtype=torch.float32)
         # p_label_tensor = torch.from_numpy(p_label_array).to(dtype=torch.int64)
 
-        point_label, pt = random_click(mask_np, point_labels=1)
-
         image_meta_dict = {'filename_or_obj': name}
 
         return {
@@ -137,7 +134,7 @@ class Multitask(Dataset):
             if len(label.shape) == 3:
                 label = label[..., 0]
             label = label[ymin:ymax, xmin:xmax]
-            label = cv2.resize(label, (self.args.size, self.args.size), interpolation=cv2.INTER_NEAREST)
+            label = cv2.resize(label, (1024, 1024), interpolation=cv2.INTER_NEAREST)
 
             # Convert label from numpy to Image
             # target = Image.fromarray(np.uint8(label)).convert('1')
@@ -147,14 +144,14 @@ class Multitask(Dataset):
                     
                 label_pseudo_odoc = cv2.imread(f'/data/wangzh/code/retsam/results_val/index_0/task_1/{name}.png')[..., 0]
                 try:
-                    label_pseudo_odoc = cv2.resize(label_pseudo_odoc, (self.args.size, self.args.size), interpolation=cv2.INTER_NEAREST)
+                    label_pseudo_odoc = cv2.resize(label_pseudo_odoc, (1024, 1024), interpolation=cv2.INTER_NEAREST)
                 except:
                     print(name)
                 # target_pseudo_odoc = Image.fromarray(np.uint8(label_pseudo_odoc))
             
                 label_pseudo_lesion = cv2.imread(f'/data/wangzh/code/retsam/results_val/index_0/task_2/{name}.png')[..., 0]
                 try:
-                    label_pseudo_lesion = cv2.resize(label_pseudo_lesion, (self.args.size, self.args.size), interpolation=cv2.INTER_NEAREST)
+                    label_pseudo_lesion = cv2.resize(label_pseudo_lesion, (1024, 1024), interpolation=cv2.INTER_NEAREST)
                 except:
                     print(name)
                 # target_pseudo_lesion = Image.fromarray(np.uint8(label_pseudo_lesion))
@@ -167,14 +164,11 @@ class Multitask(Dataset):
                 # mask[label_pseudo_lesion == 2] = 5
                 # mask[label_pseudo_lesion == 3] = 6
                 # mask[label_pseudo_lesion == 4] = 7
-                mask = Image.fromarray(np.uint8(mask)).convert('L')
-
-                mask_test = np.array(mask)
-                print(np.unique(mask_test))
 
                 return mask
             else:
-                mask = Image.fromarray(np.uint8(label)).convert('L')
+                mask = np.zeros_like(label)
+                mask[label > 0] = 1
                 return mask
 
         # Read labels for odoc seg
@@ -188,7 +182,7 @@ class Multitask(Dataset):
             label[(label > 0) & (label < 255)] = 1
             label[label == 255] = 2
             try:
-                label = cv2.resize(label, (self.args.size, self.args.size), interpolation=cv2.INTER_NEAREST)
+                label = cv2.resize(label, (1024, 1024), interpolation=cv2.INTER_NEAREST)
             except:
                 print(name)
 
@@ -199,11 +193,11 @@ class Multitask(Dataset):
                 # Read pseudo labels for odoc and lesion
                 
                 label_pseudo_vessel = cv2.imread(f'/data/wangzh/code/retsam/results_val/index_0/task_0/{name}.png')[..., 0]
-                label_pseudo_vessel = cv2.resize(label_pseudo_vessel, (self.args.size, self.args.size), interpolation=cv2.INTER_NEAREST)
+                label_pseudo_vessel = cv2.resize(label_pseudo_vessel, (1024, 1024), interpolation=cv2.INTER_NEAREST)
                 # target_pseudo_vessel = Image.fromarray(np.uint8(label_pseudo_vessel))
             
                 label_pseudo_lesion = cv2.imread(f'/data/wangzh/code/retsam/results_val/index_0/task_2/{name}.png')[..., 0]
-                label_pseudo_lesion = cv2.resize(label_pseudo_lesion, (self.args.size, self.args.size), interpolation=cv2.INTER_NEAREST)
+                label_pseudo_lesion = cv2.resize(label_pseudo_lesion, (1024, 1024), interpolation=cv2.INTER_NEAREST)
                 # target_pseudo_lesion = Image.fromarray(np.uint8(label_pseudo_lesion))
 
                 mask = np.zeros_like(label)
@@ -254,10 +248,10 @@ class Multitask(Dataset):
             except:
                 print(root_dirs)
             
-            label_ex = cv2.resize(label_ex, (self.args.size, self.args.size), interpolation=cv2.INTER_NEAREST)
-            label_he = cv2.resize(label_he, (self.args.size, self.args.size), interpolation=cv2.INTER_NEAREST)
-            label_ma = cv2.resize(label_ma, (self.args.size, self.args.size), interpolation=cv2.INTER_NEAREST)
-            label_se = cv2.resize(label_se, (self.args.size, self.args.size), interpolation=cv2.INTER_NEAREST)
+            label_ex = cv2.resize(label_ex, (1024, 1024), interpolation=cv2.INTER_NEAREST)
+            label_he = cv2.resize(label_he, (1024, 1024), interpolation=cv2.INTER_NEAREST)
+            label_ma = cv2.resize(label_ma, (1024, 1024), interpolation=cv2.INTER_NEAREST)
+            label_se = cv2.resize(label_se, (1024, 1024), interpolation=cv2.INTER_NEAREST)
 
             label = np.zeros((label_ex.shape[0], label_ex.shape[1]), dtype=np.uint8)
             label[np.where(label_ex == 255)] = 1
@@ -265,7 +259,7 @@ class Multitask(Dataset):
             label[np.where(label_ma == 255)] = 3
             label[np.where(label_se == 255)] = 4
 
-            label = cv2.resize(label, (self.args.size, self.args.size), interpolation=cv2.INTER_NEAREST)
+            label = cv2.resize(label, (1024, 1024), interpolation=cv2.INTER_NEAREST)
 
             # Convert label from numpy to Image
             # target = Image.fromarray(np.uint8(label))
@@ -273,11 +267,11 @@ class Multitask(Dataset):
             if not split == 'test':
                 # Read pseudo labels for vessel and odoc
                 label_pseudo_vessel = cv2.imread(f'/data/wangzh/code/retsam/results_val/index_0/task_0/{name}.png')[..., 0]
-                label_pseudo_vessel = cv2.resize(label_pseudo_vessel, (self.args.size, self.args.size), interpolation=cv2.INTER_NEAREST)
+                label_pseudo_vessel = cv2.resize(label_pseudo_vessel, (1024, 1024), interpolation=cv2.INTER_NEAREST)
                 # target_pseudo_vessel = Image.fromarray(np.uint8(label_pseudo_vessel))
             
                 label_pseudo_odoc = cv2.imread(f'/data/wangzh/code/retsam/results_val/index_0/task_1/{name}.png')[..., 0]
-                label_pseudo_odoc = cv2.resize(label_pseudo_odoc, (self.args.size, self.args.size), interpolation=cv2.INTER_NEAREST)
+                label_pseudo_odoc = cv2.resize(label_pseudo_odoc, (1024, 1024), interpolation=cv2.INTER_NEAREST)
                 # target_pseudo_odoc = Image.fromarray(np.uint8(label_pseudo_odoc))
 
                 mask = np.zeros_like(label)
