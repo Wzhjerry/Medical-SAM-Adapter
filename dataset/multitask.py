@@ -222,7 +222,7 @@ class Multitask(Dataset):
             else:
                 mask = np.zeros_like(label)
                 mask[label > 1] = 1
-                mask = Image.fromarray(np.uint8(label)).convert('L')
+                mask = Image.fromarray(np.uint8(mask)).convert('L')
                 return mask
     
         # Read labels for lesion seg
