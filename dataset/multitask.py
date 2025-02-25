@@ -103,7 +103,7 @@ class Multitask(Dataset):
             # 构造当前类别的二值 mask
             binary_mask = (mask_np == cls).astype(np.uint8)
             # 调用 random_click 生成随机点击，返回的 point_label 可以直接设为当前类别
-            point_label, pt = random_click(binary_mask, point_labels=1)
+            point_label, pt = random_click(binary_mask, point_labels=cls)
             pt_dict[cls] = pt
             p_label_dict[cls] = point_label
 
@@ -111,7 +111,7 @@ class Multitask(Dataset):
 
         return {
             'image': im_t,  # tensor 类型
-            'mask': target_t,  # 多类别 mask，tensor 类型
+            'label': target_t,  # 多类别 mask，tensor 类型
             'pt_dict': pt_dict,          # 字典，每个键为类别，值为点击点 [x, y]
             'p_label_dict': p_label_dict,  # 字典，每个键为类别，值为对应的标签（通常与类别相同）
             'image_meta_dict': image_meta_dict,
