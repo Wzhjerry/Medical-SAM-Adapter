@@ -182,7 +182,10 @@ class Multitask(Dataset):
             label = label[ymin:ymax, xmin:xmax]
             label[(label > 0) & (label < 255)] = 1
             label[label == 255] = 2
-            label = cv2.resize(label, (self.args.size, self.args.size), interpolation=cv2.INTER_NEAREST)
+            try:
+                label = cv2.resize(label, (self.args.size, self.args.size), interpolation=cv2.INTER_NEAREST)
+            except:
+                print(name)
 
             # Convert label from numpy to Image
             # target = Image.fromarray(np.uint8(label))
