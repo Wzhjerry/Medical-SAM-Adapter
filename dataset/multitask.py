@@ -185,6 +185,7 @@ class Multitask(Dataset):
             label[(label > 0) & (label < 255)] = 1
             label[label == 255] = 2
             label = cv2.resize(label, (1024, 1024), interpolation=cv2.INTER_NEAREST)
+            # label = label.resize((1024, 1024))
 
             # Convert label from numpy to Image
             # target = Image.fromarray(np.uint8(label))
@@ -201,7 +202,7 @@ class Multitask(Dataset):
                 # target_pseudo_lesion = Image.fromarray(np.uint8(label_pseudo_lesion))
 
                 mask = np.zeros_like(label)
-                mask[label > 1] = 255
+                mask[np.where(label > 1)] = 255
                 # mask[label == 2] = 2
                 # mask[label_pseudo_vessel == 1] = 1
                 # mask[label_pseudo_lesion == 1] = 4
@@ -212,7 +213,7 @@ class Multitask(Dataset):
                 return mask
             else:
                 mask = np.zeros_like(label)
-                mask[label > 1] = 255
+                mask[np.where(label > 1)] = 255
                 return mask
     
         # Read labels for lesion seg
