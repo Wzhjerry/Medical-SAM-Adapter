@@ -71,7 +71,7 @@ class Multitask(Dataset):
         print(np.unique(mask))
 
         im = Image.fromarray(np.uint8(image))
-        mask = Image.fromarray(np.uint8(mask)).convert('1')
+        mask = Image.fromarray(np.uint8(mask)).convert('L')
 
         newsize = (1024, 1024)
         mask = mask.resize(newsize)
