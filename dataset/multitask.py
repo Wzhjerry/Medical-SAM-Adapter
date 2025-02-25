@@ -67,7 +67,7 @@ class Multitask(Dataset):
         # BGR -> RGB -> PIL
         image = cv2.imread(self.x[idx])[..., ::-1]
         image, ymin, ymax, xmin, xmax = remove_black_edge(image)
-        image = cv2.resize(image, (640, 640), interpolation=cv2.INTER_CUBIC)
+        image = cv2.resize(image, (1024, 1024), interpolation=cv2.INTER_CUBIC)
         # name
         name = self.names[idx]
         # label
@@ -196,10 +196,10 @@ class Multitask(Dataset):
     
         # Read labels for lesion seg
         else:
-            label_ex = Image.open(root_dirs[2]) if root_dirs[2] is not None else np.zeros((640, 640), dtype=np.uint8)
-            label_he = Image.open(root_dirs[3]) if root_dirs[3] is not None else np.zeros((640, 640), dtype=np.uint8)
-            label_ma = Image.open(root_dirs[4]) if root_dirs[4] is not None else np.zeros((640, 640), dtype=np.uint8)
-            label_se = Image.open(root_dirs[5]) if root_dirs[5] is not None else np.zeros((640, 640), dtype=np.uint8)
+            label_ex = Image.open(root_dirs[2]) if root_dirs[2] is not None else np.zeros((1024, 1024), dtype=np.uint8)
+            label_he = Image.open(root_dirs[3]) if root_dirs[3] is not None else np.zeros((1024, 1024), dtype=np.uint8)
+            label_ma = Image.open(root_dirs[4]) if root_dirs[4] is not None else np.zeros((1024, 1024), dtype=np.uint8)
+            label_se = Image.open(root_dirs[5]) if root_dirs[5] is not None else np.zeros((1024, 1024), dtype=np.uint8)
 
             label_ex = np.array(label_ex).astype(np.uint8)
             label_he = np.array(label_he).astype(np.uint8)
@@ -216,10 +216,10 @@ class Multitask(Dataset):
                 label_se = label_se[..., 0]
             
             try:
-                label_ex = label_ex[ymin:ymax, xmin:xmax] if root_dirs[2] is not None else np.zeros((640, 640), dtype=np.uint8)
-                label_he = label_he[ymin:ymax, xmin:xmax] if root_dirs[3] is not None else np.zeros((640, 640), dtype=np.uint8)
-                label_ma = label_ma[ymin:ymax, xmin:xmax] if root_dirs[4] is not None else np.zeros((640, 640), dtype=np.uint8)
-                label_se = label_se[ymin:ymax, xmin:xmax] if root_dirs[5] is not None else np.zeros((640, 640), dtype=np.uint8)
+                label_ex = label_ex[ymin:ymax, xmin:xmax] if root_dirs[2] is not None else np.zeros((1024, 1024), dtype=np.uint8)
+                label_he = label_he[ymin:ymax, xmin:xmax] if root_dirs[3] is not None else np.zeros((1024, 1024), dtype=np.uint8)
+                label_ma = label_ma[ymin:ymax, xmin:xmax] if root_dirs[4] is not None else np.zeros((1024, 1024), dtype=np.uint8)
+                label_se = label_se[ymin:ymax, xmin:xmax] if root_dirs[5] is not None else np.zeros((1024, 1024), dtype=np.uint8)
             except:
                 print(root_dirs)
             
