@@ -60,34 +60,40 @@ class ODOC(Dataset):
     def __getitem__(self, idx):
         # BGR -> RGB -> PIL
         point_label = 1
-        image = cv2.imread(self.x[idx])[..., ::-1]
-        image, ymin, ymax, xmin, xmax = remove_black_edge(image)
-        image = cv2.resize(image, (1024, 1024), interpolation=cv2.INTER_CUBIC)
-        # Name
-        name = self.names[idx]
-        # Label
-        label = self.read_labels(self.y[idx], name, ymin, ymax, xmin, xmax, self.split)
+        # image = cv2.imread(self.x[idx])[..., ::-1]
+        # image, ymin, ymax, xmin, xmax = remove_black_edge(image)
+        # image = cv2.resize(image, (1024, 1024), interpolation=cv2.INTER_CUBIC)
+        # # Name
+        # name = self.names[idx]
+        # # Label
+        # label = self.read_labels(self.y[idx], name, ymin, ymax, xmin, xmax, self.split)
         
-        im = Image.fromarray(np.uint8(image)).convert('RGB')
+        # im = Image.fromarray(np.uint8(image)).convert('RGB')
+
+        image = Image.open(self.x[idx]).convert('RGB')
+        mask = Image.open(self.y[idx]).convert('L')
+
+        newsize = (1024, 1024)
+        mask = mask.resize(newsize)
+
+        point_label, pt = random_click(np.array(mask) / 255, point_label)
 
         # Identical transformations for image and ground truth
         seed = np.random.randint(2147483647)
         torch.manual_seed(seed)
         random.seed(seed)
 
-        point_label, pt = random_click(np.array(label) / 255, point_label)
-
         if self.im_transform is not None:
-            im_t = self.im_transform(im)
+            im_t = self.im_transform(image)
 
         torch.manual_seed(seed)
         random.seed(seed)
         if self.label_transform is not None:
-            target_t = self.label_transform(label)
+            target_t = self.label_transform(mask).int()
             torch.manual_seed(seed)
             random.seed(seed)
 
-        image_meta_dict = {'filename_or_obj': name}
+        image_meta_dict = {'filename_or_obj': self.names[idx]}
 
         return {
             'image': im_t,              # Transformed image (tensor)
