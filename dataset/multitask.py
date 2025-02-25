@@ -86,18 +86,18 @@ class Multitask(Dataset):
         torch.manual_seed(seed)
         random.seed(seed)
         if self.label_transform is not None:
-            target_temp = self.label_transform(mask)
-            target_temp = F.pil_to_tensor(target_temp)
-            target_t = torch.squeeze(target_temp).long()
+            target_t = self.label_transform(mask)
+            # target_temp = F.pil_to_tensor(target_temp)
+            # target_t = torch.squeeze(target_temp).long()
             torch.manual_seed(seed)
             random.seed(seed)
 
         pt_dict = {}
-        p_label_dict = {}        
+        p_label_dict = {}
 
-        print(0)
         mask_np = mask.numpy() if torch.is_tensor(mask) else np.array(mask)
-        unique_classes = np.unique(mask_np)
+        # unique_classes = np.unique(mask_np)
+        unique_classes = [0, 1]
         for cls in unique_classes:
             if cls == 0:  # 跳过背景
                 continue
@@ -107,7 +107,6 @@ class Multitask(Dataset):
             point_label, pt = random_click(binary_mask, point_labels=cls)
             pt_dict[cls] = pt
             p_label_dict[cls] = point_label
-        print(1)
 
         image_meta_dict = {'filename_or_obj': name}
 
