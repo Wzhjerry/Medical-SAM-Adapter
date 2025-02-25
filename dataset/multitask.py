@@ -134,10 +134,10 @@ class Multitask(Dataset):
             if not split == 'test':
                 # Read pseudo labels for odoc and lesion
                     
-                label_pseudo_odoc = cv2.imread(f'./results_val/index_0/task_1/{name}.png')[..., 0]
+                label_pseudo_odoc = cv2.imread(f'/data/wangzh/code/retsam/results_val/index_0/task_1/{name}.png')[..., 0]
                 # target_pseudo_odoc = Image.fromarray(np.uint8(label_pseudo_odoc))
             
-                label_pseudo_lesion = cv2.imread(f'./results_val/index_0/task_2/{name}.png')[..., 0]
+                label_pseudo_lesion = cv2.imread(f'/data/wangzh/code/retsam/results_val/index_0/task_2/{name}.png')[..., 0]
                 # target_pseudo_lesion = Image.fromarray(np.uint8(label_pseudo_lesion))
 
                 mask = np.zeros_like(label)
@@ -152,8 +152,8 @@ class Multitask(Dataset):
 
                 return mask
             else:
-                target_pseudo = Image.fromarray(np.zeros((self.args.size, self.args.size), dtype=np.uint8))
-                return [[target, target_pseudo, target_pseudo]]
+                mask = Image.fromarray(np.uint8(label))
+                return 
 
         # Read labels for odoc seg
         elif root_dirs[1] is not None:
@@ -173,10 +173,10 @@ class Multitask(Dataset):
             if not split == 'test':
                 # Read pseudo labels for odoc and lesion
                 
-                label_pseudo_vessel = cv2.imread(f'./results_val/index_0/task_0/{name}.png')[..., 0]
+                label_pseudo_vessel = cv2.imread(f'/data/wangzh/code/retsam/results_val/index_0/task_0/{name}.png')[..., 0]
                 # target_pseudo_vessel = Image.fromarray(np.uint8(label_pseudo_vessel))
             
-                label_pseudo_lesion = cv2.imread(f'./results_val/index_0/task_2/{name}.png')[..., 0]
+                label_pseudo_lesion = cv2.imread(f'/data/wangzh/code/retsam/results_val/index_0/task_2/{name}.png')[..., 0]
                 # target_pseudo_lesion = Image.fromarray(np.uint8(label_pseudo_lesion))
 
                 mask = np.zeros_like(label)
@@ -191,8 +191,8 @@ class Multitask(Dataset):
 
                 return mask
             else:
-                target_pseudo = Image.fromarray(np.zeros((self.args.size, self.args.size), dtype=np.uint8))
-                return [[target_pseudo, target, target_pseudo]], [1, 0, 1]
+                mask = Image.fromarray(np.uint8(label))
+                return mask
     
         # Read labels for lesion seg
         else:
@@ -237,14 +237,14 @@ class Multitask(Dataset):
             label = cv2.resize(label, (self.args.size, self.args.size), interpolation=cv2.INTER_NEAREST)
 
             # Convert label from numpy to Image
-            target = Image.fromarray(np.uint8(label))
+            # target = Image.fromarray(np.uint8(label))
 
             if not split == 'test':
                 # Read pseudo labels for vessel and odoc
-                label_pseudo_vessel = cv2.imread(f'./results_val/index_0/task_0/{name}.png')[..., 0]
+                label_pseudo_vessel = cv2.imread(f'/data/wangzh/code/retsam/results_val/index_0/task_0/{name}.png')[..., 0]
                 # target_pseudo_vessel = Image.fromarray(np.uint8(label_pseudo_vessel))
             
-                label_pseudo_odoc = cv2.imread(f'./results_val/index_0/task_1/{name}.png')[..., 0]
+                label_pseudo_odoc = cv2.imread(f'/data/wangzh/code/retsam/results_val/index_0/task_1/{name}.png')[..., 0]
                 # target_pseudo_odoc = Image.fromarray(np.uint8(label_pseudo_odoc))
 
                 mask = np.zeros_like(label)
@@ -259,9 +259,8 @@ class Multitask(Dataset):
 
                 return mask
             else:
-                target_pseudo = Image.fromarray(np.zeros((self.args.size, self.args.size), dtype=np.uint8))
-                return [[target_pseudo, target_pseudo, target]], [1, 1, 0]
-
+                mask = Image.fromarray(np.uint8(label))
+                return 
 
     def read_images(self, root_dir):
         image_paths = []

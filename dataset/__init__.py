@@ -53,8 +53,8 @@ def get_dataloader(args):
 
     elif args.dataset == 'Multitask':
         '''Multitask data'''
-        multitask_train_dataset = Multitask(args, split='Train')
-        multitask_test_dataset = Multitask(args, split='Test')
+        multitask_train_dataset = Multitask(args, split='train')
+        multitask_test_dataset = Multitask(args, split='test')
 
         nice_train_loader = DataLoader(multitask_train_dataset, batch_size=args.b, shuffle=True, num_workers=8, pin_memory=True)
         nice_test_loader = DataLoader(multitask_test_dataset, batch_size=args.b, shuffle=False, num_workers=8, pin_memory=True)
