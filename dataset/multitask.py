@@ -22,6 +22,23 @@ class Multitask(Dataset):
     def __init__(self, args, split):
         super(Multitask, self).__init__()
         self.args = args
+        self.args.size = 1024
+        self.args.pseudo_num = 1
+        self.args.sub_data = [
+            "DRIVE", 
+            "FIVES", 
+            "HRF", 
+            "STARE", 
+            "G1020", 
+            "GAMMA - task3", 
+            "ORIGA", 
+            "Papila", 
+            "REFUGE", 
+            "DDR - lesion_seg", 
+            "FGADR-Seg-set", 
+            "IDRiD"
+        ]
+
         self.x, self.y, self.names = self.load_name(args, split)
         assert len(self.x) == len(self.y) == len(self.names)
         self.dataset_size = len(self.x)
@@ -92,7 +109,13 @@ class Multitask(Dataset):
 
         image_meta_dict = {'filename_or_obj': name}
 
-        return im_t, target_t, name
+        return {
+            'image': im_t,  # tensor 类型
+            'mask': mask,  # 多类别 mask，tensor 类型
+            'pt_dict': pt_dict,          # 字典，每个键为类别，值为点击点 [x, y]
+            'p_label_dict': p_label_dict,  # 字典，每个键为类别，值为对应的标签（通常与类别相同）
+            'image_meta_dict': image_meta_dict,
+        }
 
     def read_labels(self, root_dirs, name, ymin, ymax, xmin, xmax, split):
         # Read labels for vessel seg

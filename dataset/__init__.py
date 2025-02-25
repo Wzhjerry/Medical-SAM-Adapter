@@ -18,6 +18,7 @@ from .segrap import SegRap
 from .stare import STARE
 from .toothfairy import ToothFairy
 from .wbc import WBC
+from.multitask import Multitask
 
 
 def get_dataloader(args):
@@ -48,6 +49,15 @@ def get_dataloader(args):
 
         nice_train_loader = DataLoader(isic_train_dataset, batch_size=args.b, shuffle=True, num_workers=8, pin_memory=True)
         nice_test_loader = DataLoader(isic_test_dataset, batch_size=args.b, shuffle=False, num_workers=8, pin_memory=True)
+        '''end'''
+
+    elif args.dataset == 'Multitask':
+        '''Multitask data'''
+        multitask_train_dataset = Multitask(args, split='Train')
+        multitask_test_dataset = Multitask(args, split='Test')
+
+        nice_train_loader = DataLoader(multitask_train_dataset, batch_size=args.b, shuffle=True, num_workers=8, pin_memory=True)
+        nice_test_loader = DataLoader(multitask_test_dataset, batch_size=args.b, shuffle=False, num_workers=8, pin_memory=True)
         '''end'''
 
     elif args.dataset == 'decathlon':
