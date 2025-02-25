@@ -69,10 +69,10 @@ class Multitask(Dataset):
         # Label
         mask = self.read_labels(self.y[idx], name, ymin, ymax, xmin, xmax, self.split)
 
-        point_label, pt = random_click(mask, point_labels=1)
+        point_label, pt = random_click(np.array(mask), point_labels=1)
 
         im = Image.fromarray(np.uint8(image))
-        mask = Image.fromarray(np.uint8(mask)).convert('L')
+        mask = Image.fromarray(np.uint8(mask)).convert('1')
 
         # Identical transformations for image and ground truth
         seed = np.random.randint(2147483647)
@@ -181,10 +181,7 @@ class Multitask(Dataset):
             label = label[ymin:ymax, xmin:xmax]
             label[(label > 0) & (label < 255)] = 1
             label[label == 255] = 2
-            try:
-                label = cv2.resize(label, (1024, 1024), interpolation=cv2.INTER_NEAREST)
-            except:
-                print(name)
+            label = cv2.resize(label, (1024, 1024), interpolation=cv2.INTER_NEAREST)
 
             # Convert label from numpy to Image
             # target = Image.fromarray(np.uint8(label))
