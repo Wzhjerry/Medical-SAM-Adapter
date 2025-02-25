@@ -18,7 +18,8 @@ from .segrap import SegRap
 from .stare import STARE
 from .toothfairy import ToothFairy
 from .wbc import WBC
-from.multitask import Multitask
+from .multitask import Multitask
+from .odoc import ODOC
 
 
 def get_dataloader(args):
@@ -58,6 +59,15 @@ def get_dataloader(args):
 
         nice_train_loader = DataLoader(multitask_train_dataset, batch_size=args.b, shuffle=True, num_workers=8, pin_memory=True)
         nice_test_loader = DataLoader(multitask_test_dataset, batch_size=args.b, shuffle=False, num_workers=8, pin_memory=True)
+        '''end'''
+    
+    elif args.dataset == 'odoc':
+        '''odoc data'''
+        odoc_train_dataset = ODOC(args, split='train')
+        odoc_test_dataset = ODOC(args, split='test')
+
+        nice_train_loader = DataLoader(odoc_train_dataset, batch_size=args.b, shuffle=True, num_workers=8, pin_memory=True)
+        nice_test_loader = DataLoader(odoc_test_dataset, batch_size=args.b, shuffle=False, num_workers=8, pin_memory=True)
         '''end'''
 
     elif args.dataset == 'decathlon':
