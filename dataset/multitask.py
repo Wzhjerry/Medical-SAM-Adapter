@@ -103,7 +103,7 @@ class Multitask(Dataset):
             # 构造当前类别的二值 mask
             binary_mask = (mask_np == cls).astype(np.uint8)
             # 调用 random_click 生成随机点击，返回的 point_label 可以直接设为当前类别
-            point_label, pt = random_click(binary_mask, point_label=cls)
+            point_label, pt = random_click(binary_mask, point_labels=cls)
             pt_dict[cls] = pt
             p_label_dict[cls] = point_label
 
