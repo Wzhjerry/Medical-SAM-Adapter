@@ -64,7 +64,7 @@ def get_dataloader(args):
     elif args.dataset == 'odoc':
         '''odoc data'''
         odoc_train_dataset = ODOC(args, split='train')
-        odoc_test_dataset = ODOC(args, split='test')
+        odoc_test_dataset = ODOC(args, split='val')
 
         nice_train_loader = DataLoader(odoc_train_dataset, batch_size=args.b, shuffle=True, num_workers=8, pin_memory=True)
         nice_test_loader = DataLoader(odoc_test_dataset, batch_size=args.b, shuffle=False, num_workers=8, pin_memory=True)

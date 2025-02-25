@@ -142,7 +142,7 @@ class ODOC(Dataset):
 
         for dataset in args.sub_data:
             csv_path = os.path.join(root_dir, f'{dataset}/{split}.csv')
-
+            print(csv_path)
             if not os.path.exists(csv_path):
                 continue
             data = pd.read_csv(csv_path)
