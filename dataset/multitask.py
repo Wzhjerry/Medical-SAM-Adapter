@@ -201,7 +201,7 @@ class Multitask(Dataset):
                 # target_pseudo_lesion = Image.fromarray(np.uint8(label_pseudo_lesion))
 
                 mask = np.zeros_like(label)
-                mask[label > 1] = 1
+                mask[label > 1] = 255
                 # mask[label == 2] = 2
                 # mask[label_pseudo_vessel == 1] = 1
                 # mask[label_pseudo_lesion == 1] = 4
@@ -212,7 +212,7 @@ class Multitask(Dataset):
                 return mask
             else:
                 mask = np.zeros_like(label)
-                mask[label > 1] = 1
+                mask[label > 1] = 255
                 return mask
     
         # Read labels for lesion seg

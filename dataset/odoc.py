@@ -75,7 +75,6 @@ class ODOC(Dataset):
 
         newsize = (1024, 1024)
         mask = mask.resize(newsize)
-        # image = image.resize(newsize)
 
         point_label, pt = random_click(np.array(mask) / 255, point_label)
 
