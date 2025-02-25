@@ -77,7 +77,9 @@ def train_sam(args, net: nn.Module, optimizer, train_loader,
         lossfunc = criterion_G
 
     with tqdm(total=len(train_loader), desc=f'Epoch {epoch}', unit='img') as pbar:
-        for pack in train_loader:
+        for idx, pack in enumerate(train_loader):
+            print(idx)
+            print(pack.keys())
             # torch.cuda.empty_cache()
             imgs = pack['image'].to(dtype = torch.float32, device = GPUdevice)
             masks = pack['label'].to(dtype = torch.float32, device = GPUdevice)
