@@ -986,17 +986,43 @@ def vis_image(imgs, pred_masks, gt_masks, save_path, reverse = False, points = N
             imgs = imgs[:,0,:,:].unsqueeze(1).expand(b,3,h,w)
         pred_masks = pred_masks[:,0,:,:].unsqueeze(1).expand(b,3,h,w)
         gt_masks = gt_masks[:,0,:,:].unsqueeze(1).expand(b,3,h,w)
-        if points != None:
+        if points is not None:
             for i in range(b):
                 if args.thd:
-                    ps = np.round(points.cpu()/args.roi_size * args.out_size).to(dtype = torch.int)
+                    ps = torch.round(points[i] / args.roi_size * args.out_size).to(dtype=torch.int)
                 else:
-                    ps = np.round(points.cpu()/args.image_size * args.out_size).to(dtype = torch.int)
-                # gt_masks[i,:,points[i,0]-5:points[i,0]+5,points[i,1]-5:points[i,1]+5] = torch.Tensor([255, 0, 0]).to(dtype = torch.float32, device = torch.device('cuda:' + str(dev)))
+                    ps = torch.round(points[i] / args.image_size * args.out_size).to(dtype=torch.int)
                 for p in ps:
-                    gt_masks[i,0,p[i,0]-5:p[i,0]+5,p[i,1]-5:p[i,1]+5] = 0.5
-                    gt_masks[i,1,p[i,0]-5:p[i,0]+5,p[i,1]-5:p[i,1]+5] = 0.1
-                    gt_masks[i,2,p[i,0]-5:p[i,0]+5,p[i,1]-5:p[i,1]+5] = 0.4
+                    x, y = p[0].item(), p[1].item()  # Extract x and y as integers
+                    # Clamp indices to stay within image bounds
+                    x_start = max(x - 5, 0)
+                    x_end = min(x + 5, w)
+                    y_start = max(y - 5, 0)
+                    y_end = min(y + 5, h)
+                    gt_masks[i, 0, y_start:y_end, x_start:x_end] = 0.5
+                    gt_masks[i, 1, y_start:y_end, x_start:x_end] = 0.1
+                    gt_masks[i, 2, y_start:y_end, x_start:x_end] = 0.4
+        else:
+            imgs = torchvision.transforms.Resize((h,w))(imgs)
+            if imgs.size(1) == 1:
+                imgs = imgs[:,0,:,:].unsqueeze(1).expand(b,3,h,w)
+            pred_masks = pred_masks[:,0,:,:].unsqueeze(1).expand(b,3,h,w)
+            gt_masks = gt_masks[:,0,:,:].unsqueeze(1).expand(b,3,h,w)
+            if points is not None:
+                for i in range(b):
+                    if args.thd:
+                        ps = torch.round(points[i] / args.roi_size * args.out_size).to(dtype=torch.int)
+                    else:
+                        ps = torch.round(points[i] / args.image_size * args.out_size).to(dtype=torch.int)
+                    for p in ps:
+                        x, y = p[0].item(), p[1].item()
+                        x_start = max(x - 5, 0)
+                        x_end = min(x + 5, w)
+                        y_start = max(y - 5, 0)
+                        y_end = min(y + 5, h)
+                        gt_masks[i, 0, y_start:y_end, x_start:x_end] = 0.5
+                        gt_masks[i, 1, y_start:y_end, x_start:x_end] = 0.1
+                        gt_masks[i, 2, y_start:y_end, x_start:x_end] = 0.4
         if boxes is not None:
             for i in range(b):
                 # the next line causes: ValueError: Tensor uint8 expected, got torch.float32
