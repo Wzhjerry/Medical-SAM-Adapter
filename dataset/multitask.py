@@ -18,9 +18,9 @@ import pandas as pd
 os.environ["OPENCV_LOG_LEVEL"] = "0"
 
 
-class Multitask_Dataset(Dataset):
+class Multitask(Dataset):
     def __init__(self, args, split):
-        super(Multitask_Dataset, self).__init__()
+        super(Multitask, self).__init__()
         self.args = args
         self.x, self.y, self.names = self.load_name(args, split)
         assert len(self.x) == len(self.y) == len(self.names)
@@ -392,9 +392,9 @@ class Multitask_Dataset(Dataset):
 
 def load_dataset(args, train=False):
     if train:
-        train_dataset = Multitask_Dataset(args, 'train')
-        val_dataset = Multitask_Dataset(args, 'val')
+        train_dataset = Multitask(args, 'train')
+        val_dataset = Multitask(args, 'val')
         return train_dataset, val_dataset
     else:
-        test_dataset = Multitask_Dataset(args, 'test')
+        test_dataset = Multitask(args, 'test')
         return test_dataset
