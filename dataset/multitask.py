@@ -62,12 +62,12 @@ class Multitask(Dataset):
     def __getitem__(self, idx):
         # BGR -> RGB -> PIL
         image = cv2.imread(self.x[idx])[..., ::-1]
-        image, ymin, ymax, xmin, xmax = remove_black_edge(image)
+        # image, ymin, ymax, xmin, xmax = remove_black_edge(image)
         image = cv2.resize(image, (1024, 1024), interpolation=cv2.INTER_CUBIC)
         # Name
         name = self.names[idx]
         # Label
-        mask = self.read_labels(self.y[idx], name, ymin, ymax, xmin, xmax, self.split)
+        mask = self.read_labels(self.y[idx], name, self.split)
 
         im = Image.fromarray(np.uint8(image))
         mask = Image.fromarray(np.uint8(mask)).convert('L')
@@ -128,7 +128,7 @@ class Multitask(Dataset):
             'image_meta_dict': image_meta_dict,
         }
 
-    def read_labels(self, root_dirs, name, ymin, ymax, xmin, xmax, split):
+    def read_labels(self, root_dirs, name, split):
         # Read labels for vessel seg
         if root_dirs[0] is not None:
             # print('return label for vessel seg')
@@ -136,7 +136,7 @@ class Multitask(Dataset):
             label = np.array(label).astype(np.uint8)
             if len(label.shape) == 3:
                 label = label[..., 0]
-            label = label[ymin:ymax, xmin:xmax]
+            # label = label[ymin:ymax, xmin:xmax]
             label = cv2.resize(label, (1024, 1024), interpolation=cv2.INTER_NEAREST)
 
             # Convert label from numpy to Image
@@ -180,8 +180,8 @@ class Multitask(Dataset):
             label = Image.open(root_dirs[1])
             label = np.array(label).astype(np.uint8)
             if len(label.shape) == 3:
-                label = label[..., 2]
-            label = label[ymin:ymax, xmin:xmax]
+                label = label[..., 0]
+            # label = label[ymin:ymax, xmin:xmax]
             label[(label > 0) & (label < 255)] = 1
             label[label == 255] = 2
             label = cv2.resize(label, (1024, 1024), interpolation=cv2.INTER_NEAREST)
@@ -238,13 +238,13 @@ class Multitask(Dataset):
             if len(label_se.shape) == 3:
                 label_se = label_se[..., 0]
             
-            try:
-                label_ex = label_ex[ymin:ymax, xmin:xmax] if root_dirs[2] is not None else np.zeros((1024, 1024), dtype=np.uint8)
-                label_he = label_he[ymin:ymax, xmin:xmax] if root_dirs[3] is not None else np.zeros((1024, 1024), dtype=np.uint8)
-                label_ma = label_ma[ymin:ymax, xmin:xmax] if root_dirs[4] is not None else np.zeros((1024, 1024), dtype=np.uint8)
-                label_se = label_se[ymin:ymax, xmin:xmax] if root_dirs[5] is not None else np.zeros((1024, 1024), dtype=np.uint8)
-            except:
-                print(root_dirs)
+            # try:
+            #     label_ex = label_ex[ymin:ymax, xmin:xmax] if root_dirs[2] is not None else np.zeros((1024, 1024), dtype=np.uint8)
+            #     label_he = label_he[ymin:ymax, xmin:xmax] if root_dirs[3] is not None else np.zeros((1024, 1024), dtype=np.uint8)
+            #     label_ma = label_ma[ymin:ymax, xmin:xmax] if root_dirs[4] is not None else np.zeros((1024, 1024), dtype=np.uint8)
+            #     label_se = label_se[ymin:ymax, xmin:xmax] if root_dirs[5] is not None else np.zeros((1024, 1024), dtype=np.uint8)
+            # except:
+            #     print(root_dirs)
             
             label_ex = cv2.resize(label_ex, (1024, 1024), interpolation=cv2.INTER_NEAREST)
             label_he = cv2.resize(label_he, (1024, 1024), interpolation=cv2.INTER_NEAREST)
