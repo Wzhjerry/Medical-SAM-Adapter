@@ -1258,7 +1258,7 @@ def build_transform(args, train=False):
                 # transforms.ColorJitter(0.4, 0.4, 0.4, 0.1),
                 # transforms.RandomGrayscale(p=0.2),
                 # transforms.RandomResizedCrop(argss.size, scale=(0.8, 1.0)),
-                transforms.Resize(args.size),
+                transforms.Resize(1024),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
                 # transforms.Normalize(mean=[0.425753653049469, 0.29737451672554016, 0.21293757855892181], std=[0.27670302987098694, 0.20240527391433716, 0.1686241775751114]),
@@ -1278,7 +1278,7 @@ def build_transform(args, train=False):
     else:
         img_transform = transforms.Compose(
             [
-                transforms.Resize(args.size),
+                transforms.Resize(1024),
                 transforms.ToTensor(),
                 transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
                 # transforms.Normalize(mean=[0.425753653049469, 0.29737451672554016, 0.21293757855892181], std=[0.27670302987098694, 0.20240527391433716, 0.1686241775751114]),

@@ -107,8 +107,7 @@ class ODOC(Dataset):
         # label[(label > 0) & (label < 255)] = 1
         # label[label == 255] = 2
         label[label > 0] = 1
-        label = cv2.resize(label, (self.args.size, self.args.size), interpolation=cv2.INTER_NEAREST)
-
+        label = cv2.resize(label, (1024, 1024), interpolation=cv2.INTER_NEAREST)
         label = Image.fromarray(np.uint8(label)).convert("1")
 
         return label
