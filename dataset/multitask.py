@@ -27,8 +27,8 @@ class Multitask(Dataset):
         self.args.sub_data = [
             "DRIVE", 
             "FIVES", 
-            "HRF", 
-            "STARE", 
+            # "HRF", 
+            # "STARE", 
             # "G1020", 
             # "GAMMA - task3", 
             # "ORIGA", 
