@@ -1267,6 +1267,34 @@ def build_transform(args, train=False):
     return img_transform, label_transform
 
 
+def regularize_cor_cut(ori_image, xmin, ymin, xmax, ymax):
+    img_height = ori_image.shape[0]
+    img_width = ori_image.shape[1]
+    # Mask sure all coordinates in right area
+
+    if xmin > img_width:
+        xmin = img_width
+    elif xmin < 0:
+        xmin = 0
+
+    if xmax > img_width:
+        xmax = img_width
+    elif xmax < 0:
+        xmax = 0
+
+    if ymin > img_height:
+        ymin = img_height
+    elif ymin < 0:
+        ymin = 0
+
+    if ymax > img_height:
+        ymax = img_height
+    elif ymax < 0:
+        ymax = 0
+
+    return xmin, ymin, xmax, ymax
+
+
 def ave_edge_cal(ori_image):
     gray = cv2.cvtColor(ori_image, cv2.COLOR_BGR2GRAY)
     ul = gray[:5, :5]
