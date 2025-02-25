@@ -1183,6 +1183,7 @@ def random_click(mask, point_labels = 1):
     # check if all masks are black
     max_label = max(set(mask.flatten()))
     if max_label == 0:
+        print('All masks are black')
         point_labels = max_label
     # max agreement position
     indices = np.argwhere(mask == max_label) 
