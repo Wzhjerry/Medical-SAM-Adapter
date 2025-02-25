@@ -83,16 +83,12 @@ class ODOC(Dataset):
         seed = np.random.randint(2147483647)
         torch.manual_seed(seed)
         random.seed(seed)
-
-        if self.im_transform is not None:
-            im_t = self.im_transform(image)
-
+        im_t = self.im_transform(image)
         torch.manual_seed(seed)
         random.seed(seed)
-        if self.label_transform is not None:
-            target_t = self.label_transform(mask).int()
-            torch.manual_seed(seed)
-            random.seed(seed)
+        target_t = self.label_transform(mask).int()
+        torch.manual_seed(seed)
+        random.seed(seed)
 
         image_meta_dict = {'filename_or_obj': self.names[idx]}
 
