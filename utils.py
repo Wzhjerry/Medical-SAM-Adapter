@@ -17,7 +17,7 @@ import warnings
 from collections import OrderedDict
 from datetime import datetime
 from typing import BinaryIO, List, Optional, Text, Tuple, Union
-
+import cv2
 import dateutil.tz
 import matplotlib.pyplot as plt
 import numpy
@@ -1220,4 +1220,100 @@ def random_box(multi_rater):
     y_max = random.choice(np.arange(y_max-10,y_max+11))
 
     return x_min, x_max, y_min, y_max
+
+def build_transform(args, train=False):
+    if train:
+        img_transform = transforms.Compose(
+            [
+                # transforms.RandomAutocontrast(p=0.5),
+                # transforms.RandomInvert(p=0.5),
+                # transforms.RandomHorizontalFlip(),
+                # transforms.RandomVerticalFlip(),
+                transforms.ColorJitter(0.4, 0.4, 0.4, 0.1),
+                transforms.RandomGrayscale(p=0.2),
+                # transforms.RandomResizedCrop(argss.size, scale=(0.8, 1.0)),
+                transforms.Resize(args.size),
+                transforms.ToTensor(),
+                # transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
+                transforms.Normalize(mean=[0.425753653049469, 0.29737451672554016, 0.21293757855892181], std=[0.27670302987098694, 0.20240527391433716, 0.1686241775751114]),
+            ]
+        )
+
+        label_transform = transforms.Compose(
+            [
+                # transforms.RandomHorizontalFlip(),
+                # transforms.RandomVerticalFlip(),
+                # transforms.RandomResizedCrop(args.size, scale=(0.8, 1.0)),
+                transforms.Resize(args.size),
+            ]
+        )
+
+    else:
+        img_transform = transforms.Compose(
+            [
+                transforms.Resize(args.size),
+                transforms.ToTensor(),
+                # transforms.Normalize(mean=[0.5, 0.5, 0.5], std=[0.5, 0.5, 0.5]),
+                transforms.Normalize(mean=[0.425753653049469, 0.29737451672554016, 0.21293757855892181], std=[0.27670302987098694, 0.20240527391433716, 0.1686241775751114]),
+            ]
+        )
+
+        label_transform = transforms.Compose(
+            [
+                transforms.Resize(args.size),
+            ]
+        )
+    
+    return img_transform, label_transform
+
+
+def ave_edge_cal(ori_image):
+    gray = cv2.cvtColor(ori_image, cv2.COLOR_BGR2GRAY)
+    ul = gray[:5, :5]
+    ur = gray[:5, ori_image.shape[1] - 5:]
+    ll = gray[ori_image.shape[0] - 5:, :5]
+    lr = gray[ori_image.shape[0] - 5:, ori_image.shape[1] - 5:]
+    mean = (np.sum(ul) / 25 + np.sum(ur) / 25 + np.sum(ll) / 25 + np.sum(lr) / 25) / 4
+    return mean
+
+
+def remove_black_edge(ori_image):
+    b, g, r = cv2.split(ori_image)
+    img_width = ori_image.shape[1]
+    img_height = ori_image.shape[0]
+
+    mean_pixel = ave_edge_cal(ori_image)
+
+    if mean_pixel < 127:
+        img_mask = np.array(((b < 30) * (g < 30) * (r < 30)) * 1, dtype=np.uint8)
+    else:
+        img_mask = np.array((((b > 245) * (g > 245) * (r > 245))) * 1, dtype=np.uint8)
+
+    # Cauculate the x-beginning for each line by sum the half mask
+    half_start = np.sum(img_mask[:, :img_width // 2], 1).reshape(img_height, 1)
+    # Cauculate the x-end by img_width - sum of the right half mask
+    half_end = img_width - np.sum(img_mask[:, img_width // 2:], 1).reshape(img_height, 1)
+
+    start_len = img_width // 2 - np.min(half_start)
+    end_len = np.max(half_end) - img_width // 2
+    half_len = max(start_len, end_len)
+
+    cor_sum = np.sum(img_mask, 1).reshape(img_height, 1)
+    cor_sum_binary = np.array((cor_sum > img_width - 10)*1, dtype=np.uint8)
+
+    vertical_start = cor_sum_binary[:len(cor_sum_binary) // 2]
+    vertical_end = cor_sum_binary[len(cor_sum_binary) // 2:]
+
+    vertical_start_cor = np.sum(vertical_start)
+    vertical_end_cor = np.sum(vertical_end)
+
+    xmin, ymin, xmax, ymax = regularize_cor_cut(ori_image,
+                                                int(img_width // 2 - half_len),
+                                                int(vertical_start_cor),
+                                                int(img_width // 2 + half_len),
+                                                int(img_height-vertical_end_cor))
+    cut_image = ori_image[ymin: ymax, xmin: xmax]
+
+    return cut_image, ymin, ymax, xmin, xmax
+
 

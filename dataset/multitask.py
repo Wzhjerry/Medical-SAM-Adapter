@@ -1,0 +1,400 @@
+import os
+import cv2
+import numpy as np
+import torch
+import random
+import glob
+from PIL import Image
+from torch.utils.data import Dataset
+from tqdm import tqdm
+# from datasets.utils import analyze_name
+from utils import random_box, random_click, build_transform, remove_black_edge
+from sklearn.model_selection import KFold
+from torchvision.transforms import functional as F
+import pandas as pd
+
+
+
+os.environ["OPENCV_LOG_LEVEL"] = "0"
+
+
+class Multitask_Dataset(Dataset):
+    def __init__(self, args, split):
+        super(Multitask_Dataset, self).__init__()
+        self.args = args
+        self.x, self.y, self.names = self.load_name(args, split)
+        assert len(self.x) == len(self.y) == len(self.names)
+        self.dataset_size = len(self.x)
+        self.train = True if split == "train" else False
+        self.im_transform, self.label_transform = build_transform(args, self.train)
+        self.split = split
+        self.pseudo_num = self.args.pseudo_num
+
+    def __len__(self):
+        # if self.train:
+        #     return self.dataset_size * 2
+        # else:
+        return self.dataset_size
+
+    def _get_index(self, idx):
+        if self.train:
+            return idx % self.dataset_size
+        else:
+            return idx
+
+    def __getitem__(self, idx):
+        # if torch.is_tensor(idx):
+        #     idx = idx.tolist()
+        # idx = self._get_index(idx)
+
+        # BGR -> RGB -> PIL
+        image = cv2.imread(self.x[idx])[..., ::-1]
+        image, ymin, ymax, xmin, xmax = remove_black_edge(image)
+        image = cv2.resize(image, (640, 640), interpolation=cv2.INTER_CUBIC)
+        # name
+        name = self.names[idx]
+        # label
+        mask = self.read_labels(self.y[idx], name, ymin, ymax, xmin, xmax, self.split)
+        
+        im = Image.fromarray(np.uint8(image))
+
+        # identical transformation for im and gt
+        seed = np.random.randint(2147483647)
+        torch.manual_seed(seed)
+        random.seed(seed)
+
+        if self.im_transform is not None:
+            im_t = self.im_transform(im)
+
+        torch.manual_seed(seed)
+        random.seed(seed)
+        if self.label_transform is not None:
+            target_temp = self.label_transform(mask)
+            target_temp = F.pil_to_tensor(target_temp)
+            target_t = torch.squeeze(target_temp).long()
+            torch.manual_seed(seed)
+            random.seed(seed)
+
+        pt_dict = {}
+        p_label_dict = {}        
+
+        mask_np = mask.numpy() if torch.is_tensor(mask) else np.array(mask)
+        unique_classes = np.unique(mask_np)
+        for cls in unique_classes:
+            if cls == 0:  # 跳过背景
+                continue
+            # 构造当前类别的二值 mask
+            binary_mask = (mask_np == cls).astype(np.uint8)
+            # 调用 random_click 生成随机点击，返回的 point_label 可以直接设为当前类别
+            point_label, pt = random_click(binary_mask, point_label=cls)
+            pt_dict[cls] = pt
+            p_label_dict[cls] = point_label
+
+        image_meta_dict = {'filename_or_obj': name}
+
+        return im_t, target_t, name
+
+    def read_labels(self, root_dirs, name, ymin, ymax, xmin, xmax, split):
+        # Read labels for vessel seg
+        if root_dirs[0] is not None:
+            # print('return label for vessel seg')
+            label = Image.open(root_dirs[0])
+            label = np.array(label).astype(np.uint8)
+            if len(label.shape) == 3:
+                label = label[..., 0]
+            label = label[ymin:ymax, xmin:xmax]
+            label = cv2.resize(label, (self.args.size, self.args.size), interpolation=cv2.INTER_NEAREST)
+
+            # Convert label from numpy to Image
+            # target = Image.fromarray(np.uint8(label)).convert('1')
+
+            if not split == 'test':
+                # Read pseudo labels for odoc and lesion
+                    
+                label_pseudo_odoc = cv2.imread(f'./results_val/index_0/task_1/{name}.png')[..., 0]
+                # target_pseudo_odoc = Image.fromarray(np.uint8(label_pseudo_odoc))
+            
+                label_pseudo_lesion = cv2.imread(f'./results_val/index_0/task_2/{name}.png')[..., 0]
+                # target_pseudo_lesion = Image.fromarray(np.uint8(label_pseudo_lesion))
+
+                mask = np.zeros_like(label)
+                mask[label > 0] = 1
+                mask[label_pseudo_odoc == 1] = 2
+                mask[label_pseudo_odoc == 2] = 3
+                mask[label_pseudo_lesion == 1] = 4
+                mask[label_pseudo_lesion == 2] = 5
+                mask[label_pseudo_lesion == 3] = 6
+                mask[label_pseudo_lesion == 4] = 7
+                mask = Image.fromarray(np.uint8(mask))
+
+                return mask
+            else:
+                target_pseudo = Image.fromarray(np.zeros((self.args.size, self.args.size), dtype=np.uint8))
+                return [[target, target_pseudo, target_pseudo]]
+
+        # Read labels for odoc seg
+        elif root_dirs[1] is not None:
+            # print('return label for odoc seg')
+            label = Image.open(root_dirs[1])
+            label = np.array(label).astype(np.uint8)
+            if len(label.shape) == 3:
+                label = label[..., 0]
+            label = label[ymin:ymax, xmin:xmax]
+            label[(label > 0) & (label < 255)] = 1
+            label[label == 255] = 2
+            label = cv2.resize(label, (self.args.size, self.args.size), interpolation=cv2.INTER_NEAREST)
+
+            # Convert label from numpy to Image
+            # target = Image.fromarray(np.uint8(label))
+
+            if not split == 'test':
+                # Read pseudo labels for odoc and lesion
+                
+                label_pseudo_vessel = cv2.imread(f'./results_val/index_0/task_0/{name}.png')[..., 0]
+                # target_pseudo_vessel = Image.fromarray(np.uint8(label_pseudo_vessel))
+            
+                label_pseudo_lesion = cv2.imread(f'./results_val/index_0/task_2/{name}.png')[..., 0]
+                # target_pseudo_lesion = Image.fromarray(np.uint8(label_pseudo_lesion))
+
+                mask = np.zeros_like(label)
+                mask[label == 1] = 2
+                mask[label == 2] = 3
+                mask[label_pseudo_vessel == 1] = 1
+                mask[label_pseudo_lesion == 1] = 4
+                mask[label_pseudo_lesion == 2] = 5
+                mask[label_pseudo_lesion == 3] = 6
+                mask[label_pseudo_lesion == 4] = 7
+                mask = Image.fromarray(np.uint8(mask))
+
+                return mask
+            else:
+                target_pseudo = Image.fromarray(np.zeros((self.args.size, self.args.size), dtype=np.uint8))
+                return [[target_pseudo, target, target_pseudo]], [1, 0, 1]
+    
+        # Read labels for lesion seg
+        else:
+            label_ex = Image.open(root_dirs[2]) if root_dirs[2] is not None else np.zeros((640, 640), dtype=np.uint8)
+            label_he = Image.open(root_dirs[3]) if root_dirs[3] is not None else np.zeros((640, 640), dtype=np.uint8)
+            label_ma = Image.open(root_dirs[4]) if root_dirs[4] is not None else np.zeros((640, 640), dtype=np.uint8)
+            label_se = Image.open(root_dirs[5]) if root_dirs[5] is not None else np.zeros((640, 640), dtype=np.uint8)
+
+            label_ex = np.array(label_ex).astype(np.uint8)
+            label_he = np.array(label_he).astype(np.uint8)
+            label_ma = np.array(label_ma).astype(np.uint8)
+            label_se = np.array(label_se).astype(np.uint8)
+
+            if len(label_ex.shape) == 3:
+                label_ex = label_ex[..., 0]
+            if len(label_he.shape) == 3:
+                label_he = label_he[..., 0]
+            if len(label_ma.shape) == 3:
+                label_ma = label_ma[..., 0]
+            if len(label_se.shape) == 3:
+                label_se = label_se[..., 0]
+            
+            try:
+                label_ex = label_ex[ymin:ymax, xmin:xmax] if root_dirs[2] is not None else np.zeros((640, 640), dtype=np.uint8)
+                label_he = label_he[ymin:ymax, xmin:xmax] if root_dirs[3] is not None else np.zeros((640, 640), dtype=np.uint8)
+                label_ma = label_ma[ymin:ymax, xmin:xmax] if root_dirs[4] is not None else np.zeros((640, 640), dtype=np.uint8)
+                label_se = label_se[ymin:ymax, xmin:xmax] if root_dirs[5] is not None else np.zeros((640, 640), dtype=np.uint8)
+            except:
+                print(root_dirs)
+            
+            label_ex = cv2.resize(label_ex, (self.args.size, self.args.size), interpolation=cv2.INTER_NEAREST)
+            label_he = cv2.resize(label_he, (self.args.size, self.args.size), interpolation=cv2.INTER_NEAREST)
+            label_ma = cv2.resize(label_ma, (self.args.size, self.args.size), interpolation=cv2.INTER_NEAREST)
+            label_se = cv2.resize(label_se, (self.args.size, self.args.size), interpolation=cv2.INTER_NEAREST)
+
+            label = np.zeros((label_ex.shape[0], label_ex.shape[1]), dtype=np.uint8)
+            label[np.where(label_ex == 255)] = 1
+            label[np.where(label_he == 255)] = 2
+            label[np.where(label_ma == 255)] = 3
+            label[np.where(label_se == 255)] = 4
+
+            label = cv2.resize(label, (self.args.size, self.args.size), interpolation=cv2.INTER_NEAREST)
+
+            # Convert label from numpy to Image
+            target = Image.fromarray(np.uint8(label))
+
+            if not split == 'test':
+                # Read pseudo labels for vessel and odoc
+                label_pseudo_vessel = cv2.imread(f'./results_val/index_0/task_0/{name}.png')[..., 0]
+                # target_pseudo_vessel = Image.fromarray(np.uint8(label_pseudo_vessel))
+            
+                label_pseudo_odoc = cv2.imread(f'./results_val/index_0/task_1/{name}.png')[..., 0]
+                # target_pseudo_odoc = Image.fromarray(np.uint8(label_pseudo_odoc))
+
+                mask = np.zeros_like(label)
+                mask[label == 1] = 4
+                mask[label == 2] = 5
+                mask[label == 3] = 6
+                mask[label == 4] = 7
+                mask[label_pseudo_vessel == 1] = 1
+                mask[label_pseudo_odoc == 1] = 2
+                mask[label_pseudo_odoc == 2] = 3
+                mask = Image.fromarray(np.uint8(mask))
+
+                return mask
+            else:
+                target_pseudo = Image.fromarray(np.zeros((self.args.size, self.args.size), dtype=np.uint8))
+                return [[target_pseudo, target_pseudo, target]], [1, 1, 0]
+
+
+    def read_images(self, root_dir):
+        image_paths = []
+        patterns = ['*.png', '*.jpg', '*.jpeg']
+        for pattern in patterns:
+            full_pattern = os.path.join(root_dir, '**', pattern)
+            found_paths = glob.glob(full_pattern, recursive=True)
+            image_paths.extend(found_paths)
+        return image_paths
+
+    def load_name(self, args, split):
+        inputs, targets, names = [], [], []
+
+        vessel_inputs, vessel_targets, vessel_names = self.load_vessel(args, split)
+        ODOC_inputs, ODOC_targets, ODOC_names = self.load_ODOC(args, split)
+        lesion_inputs, lesion_targets, lesion_names = self.load_lesion(args, split)
+
+        for i in range(len(vessel_inputs)):
+            inputs.append(vessel_inputs[i])
+            targets.append([vessel_targets[i], None, None, None, None, None])
+            names.append(vessel_names[i])
+        
+        for i in range(len(ODOC_inputs)):
+            inputs.append(ODOC_inputs[i])
+            targets.append([None, ODOC_targets[i], None, None, None, None])
+            names.append(ODOC_names[i])
+
+        for i in range(len(lesion_inputs)):
+            inputs.append(lesion_inputs[i])
+            targets.append([None, None, lesion_targets[0][i], lesion_targets[1][i], lesion_targets[2][i], lesion_targets[3][i]])
+            names.append(lesion_names[i])
+        
+        inputs = np.array(inputs)
+        targets = np.array(targets)
+        names = np.array(names)
+
+        return inputs, targets, names
+
+    def load_vessel(self, args, split):
+        inputs, targets, names = [], [], []
+
+        # Define root directories
+        root_dir = '/data/wangzh/datasets/fundus_miccai/vessel_seg/'
+
+        for dataset in args.sub_data:
+            csv_path = os.path.join(root_dir, f'{dataset}/{split}.csv')
+
+            if not os.path.exists(csv_path):
+                continue
+            data = pd.read_csv(csv_path)
+            images = data['image_path'].values
+            labels = data['label_path'].values
+            image_names = data['image_name'].values
+            image_names = [dataset + '_' + split + '_' + str(name) for name in image_names]
+
+            inputs.extend(images)
+            targets.extend(labels)
+            names.extend(image_names)
+
+        inputs = [str.replace('/datasets/vessel_seg/', root_dir) for str in inputs]
+        targets = [str.replace('/datasets/vessel_seg/', root_dir) for str in targets]
+
+        inputs = np.array(inputs)
+        targets = np.array(targets)
+        names = np.array(names)
+
+        print("=> Using {} images for vessel {}".format(len(inputs), split))
+        return inputs, targets, names
+
+    def load_ODOC(self, args, split):
+        inputs, targets, names = [], [], []
+
+        # Define root directories
+        root_dir = '/data/wangzh/datasets/fundus_miccai/ODOC_seg/'
+
+        for dataset in args.sub_data:
+            csv_path = os.path.join(root_dir, f'{dataset}/{split}.csv')
+
+            if not os.path.exists(csv_path):
+                continue
+            data = pd.read_csv(csv_path)
+            images = data['image_path'].values
+            labels = data['label_path'].values
+            image_names = data['image_name'].values
+            image_names = [dataset + '_' + split + '_' + str(name) for name in image_names]
+
+            inputs.extend(images)
+            targets.extend(labels)
+            names.extend(image_names)
+
+        inputs = [str.replace('/datasets/ODOC_seg/', root_dir) for str in inputs]
+        targets = [str.replace('/datasets/ODOC_seg/', root_dir) for str in targets]
+
+        inputs = np.array(inputs)
+        targets = np.array(targets)
+        names = np.array(names)
+
+        print("=> Using {} images for ODOC {}".format(len(inputs), split))
+        return inputs, targets, names
+
+    def load_lesion(self, args, split):
+        inputs, targets_ex, targets_he, targets_ma, targets_se, names = [], [], [], [], [], []
+
+        # Define root directories
+        root_dir = '/data/wangzh/datasets/fundus_miccai/lesion_seg/'
+
+        for dataset in args.sub_data:
+            csv_path = os.path.join(root_dir, f'{dataset}/{split}.csv')
+
+            if not os.path.exists(csv_path):
+                continue
+            data = pd.read_csv(csv_path)
+            images = data['image_path'].values
+            for col in ["label_EX_path", "label_HE_path", "label_MA_path", "label_SE_path"]:
+                data[col] = data[col].apply(lambda x: None if pd.isna(x) else x)
+            labels_ex = data['label_EX_path'].values
+            labels_he = data['label_HE_path'].values
+            labels_ma = data['label_MA_path'].values
+            labels_se = data['label_SE_path'].values
+            image_names = data['image_name'].values
+            image_names = [dataset + '_' + split + '_' + str(name) for name in image_names]
+
+            inputs.extend(images)
+            targets_ex.extend(labels_ex)
+            targets_he.extend(labels_he)
+            targets_ma.extend(labels_ma)
+            targets_se.extend(labels_se)
+            names.extend(image_names)
+
+        for i in range(len(inputs)):
+            inputs[i] = str.replace(inputs[i], '/datasets/lesion_seg/', root_dir)
+            if targets_ex[i] is not None:
+                targets_ex[i] = str.replace(targets_ex[i], '/datasets/lesion_seg/', root_dir)
+            if targets_he[i] is not None:
+                targets_he[i] = str.replace(targets_he[i], '/datasets/lesion_seg/', root_dir)
+            if targets_ma[i] is not None:
+                targets_ma[i] = str.replace(targets_ma[i], '/datasets/lesion_seg/', root_dir)
+            if targets_se[i] is not None:
+                targets_se[i] = str.replace(targets_se[i], '/datasets/lesion_seg/', root_dir)
+
+        inputs = np.array(inputs)
+        targets_ex = np.array(targets_ex)
+        targets_he = np.array(targets_he)
+        targets_ma = np.array(targets_ma)
+        targets_se = np.array(targets_se)
+        names = np.array(names)
+
+        print("=> Using {} images for Lesion {}".format(len(inputs), split))
+        return inputs, [targets_ex, targets_he, targets_ma, targets_se], names
+
+
+def load_dataset(args, train=False):
+    if train:
+        train_dataset = Multitask_Dataset(args, 'train')
+        val_dataset = Multitask_Dataset(args, 'val')
+        return train_dataset, val_dataset
+    else:
+        test_dataset = Multitask_Dataset(args, 'test')
+        return test_dataset
