@@ -69,10 +69,13 @@ class Multitask(Dataset):
         # Label
         mask = self.read_labels(self.y[idx], name, ymin, ymax, xmin, xmax, self.split)
 
-        point_label, pt = random_click(np.array(mask), point_labels=1)
-
         im = Image.fromarray(np.uint8(image))
         mask = Image.fromarray(np.uint8(mask)).convert('1')
+
+        newsize = (1024, 1024)
+        mask = mask.resize(newsize)
+
+        point_label, pt = random_click(np.array(mask), point_labels=1)
 
         # Identical transformations for image and ground truth
         seed = np.random.randint(2147483647)
