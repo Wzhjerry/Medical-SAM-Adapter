@@ -104,13 +104,17 @@ class Multitask(Dataset):
             p_label_list.append(point_label)
 
         # Convert lists to tensors
-        if pt_list:
-            pt_tensor = torch.tensor(pt_list, dtype=torch.float32)  # Shape: (num_classes, 2)
-            p_label_tensor = torch.tensor(p_label_list, dtype=torch.int64)  # Shape: (num_classes,)
-        else:
-            # If no classes are present, return empty tensors
-            pt_tensor = torch.zeros(0, 2, dtype=torch.float32)
-            p_label_tensor = torch.zeros(0, dtype=torch.int64)
+        # Convert lists to NumPy arrays
+        if pt_list:  # Check if the list is not empty
+            pt_array = np.stack(pt_list)          # Shape: (num_classes, 2)
+            p_label_array = np.array(p_label_list) # Shape: (num_classes,)
+        else:  # Handle the empty case
+            pt_array = np.empty((0, 2), dtype=np.float32)
+            p_label_array = np.empty(0, dtype=np.int64)
+
+        # Convert NumPy arrays to PyTorch tensors
+        pt_tensor = torch.from_numpy(pt_array).to(dtype=torch.float32)
+        p_label_tensor = torch.from_numpy(p_label_array).to(dtype=torch.int64)
 
         image_meta_dict = {'filename_or_obj': name}
 
