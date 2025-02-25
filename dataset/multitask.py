@@ -26,17 +26,17 @@ class Multitask(Dataset):
         self.args.pseudo_num = 1
         self.args.sub_data = [
             "DRIVE", 
-            "FIVES", 
-            "HRF", 
-            "STARE", 
-            "G1020", 
-            "GAMMA - task3", 
-            "ORIGA", 
-            "Papila", 
-            "REFUGE", 
-            "DDR - lesion_seg", 
-            "FGADR-Seg-set", 
-            "IDRiD"
+            # "FIVES", 
+            # "HRF", 
+            # "STARE", 
+            # "G1020", 
+            # "GAMMA - task3", 
+            # "ORIGA", 
+            # "Papila", 
+            # "REFUGE", 
+            # "DDR - lesion_seg", 
+            # "FGADR-Seg-set", 
+            # "IDRiD"
         ]
 
         self.x, self.y, self.names = self.load_name(args, split)
@@ -60,22 +60,18 @@ class Multitask(Dataset):
             return idx
 
     def __getitem__(self, idx):
-        # if torch.is_tensor(idx):
-        #     idx = idx.tolist()
-        # idx = self._get_index(idx)
-
         # BGR -> RGB -> PIL
         image = cv2.imread(self.x[idx])[..., ::-1]
         image, ymin, ymax, xmin, xmax = remove_black_edge(image)
         image = cv2.resize(image, (1024, 1024), interpolation=cv2.INTER_CUBIC)
-        # name
+        # Name
         name = self.names[idx]
-        # label
+        # Label
         mask = self.read_labels(self.y[idx], name, ymin, ymax, xmin, xmax, self.split)
         
         im = Image.fromarray(np.uint8(image))
 
-        # identical transformation for im and gt
+        # Identical transformations for image and ground truth
         seed = np.random.randint(2147483647)
         torch.manual_seed(seed)
         random.seed(seed)
@@ -87,34 +83,42 @@ class Multitask(Dataset):
         random.seed(seed)
         if self.label_transform is not None:
             target_t = self.label_transform(mask)
-            # target_temp = F.pil_to_tensor(target_temp)
-            # target_t = torch.squeeze(target_temp).long()
             torch.manual_seed(seed)
             random.seed(seed)
 
-        pt_dict = {}
-        p_label_dict = {}
-
+        # Convert mask to NumPy array if it’s a tensor
         mask_np = mask.numpy() if torch.is_tensor(mask) else np.array(mask)
-        # unique_classes = np.unique(mask_np)
-        unique_classes = [1]
+        # Find all unique classes in the mask, excluding background (0)
+        unique_classes = np.unique(mask_np)
+        unique_classes = unique_classes[unique_classes != 0]
+
+        # Lists to store points and labels
+        pt_list = []
+        p_label_list = []
+
+        # Generate one point per class
         for cls in unique_classes:
-            if cls == 0:  # 跳过背景
-                continue
-            # 构造当前类别的二值 mask
             binary_mask = (mask_np == cls).astype(np.uint8)
-            # 调用 random_click 生成随机点击，返回的 point_label 可以直接设为当前类别
             point_label, pt = random_click(binary_mask, point_labels=cls)
-            pt_dict[cls] = pt
-            p_label_dict[cls] = point_label
+            pt_list.append(pt)
+            p_label_list.append(point_label)
+
+        # Convert lists to tensors
+        if pt_list:
+            pt_tensor = torch.tensor(pt_list, dtype=torch.float32)  # Shape: (num_classes, 2)
+            p_label_tensor = torch.tensor(p_label_list, dtype=torch.int64)  # Shape: (num_classes,)
+        else:
+            # If no classes are present, return empty tensors
+            pt_tensor = torch.zeros(0, 2, dtype=torch.float32)
+            p_label_tensor = torch.zeros(0, dtype=torch.int64)
 
         image_meta_dict = {'filename_or_obj': name}
 
         return {
-            'image': im_t,  # tensor 类型
-            'label': target_t,  # 多类别 mask，tensor 类型
-            'p_label': p_label_dict[1],  # 字典，每个键为类别，值为对应的标签（通常与类别相同）
-            'pt': pt_dict[1],          # 字典，每个键为类别，值为点击点 [x, y]
+            'image': im_t,              # Transformed image (tensor)
+            'label': target_t,          # Transformed multi-class mask (tensor)
+            'p_label': p_label_tensor,  # Tensor of point labels (num_classes,)
+            'pt': pt_tensor,            # Tensor of points (num_classes, 2)
             'image_meta_dict': image_meta_dict,
         }
 
