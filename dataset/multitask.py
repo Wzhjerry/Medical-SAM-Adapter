@@ -180,7 +180,7 @@ class Multitask(Dataset):
             label = Image.open(root_dirs[1])
             label = np.array(label).astype(np.uint8)
             if len(label.shape) == 3:
-                label = label[..., 0]
+                label = label[..., 2]
             label = label[ymin:ymax, xmin:xmax]
             label[(label > 0) & (label < 255)] = 1
             label[label == 255] = 2
