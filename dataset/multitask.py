@@ -210,7 +210,9 @@ class Multitask(Dataset):
                 # mask[label_pseudo_lesion == 3] = 6
                 # mask[label_pseudo_lesion == 4] = 7
 
-                print(np.unique(mask))
+                # print(np.unique(mask))
+                if np.unique(mask).shape[0] < 1:
+                    print(name)
                 return mask
             else:
                 mask = np.zeros_like(label)
