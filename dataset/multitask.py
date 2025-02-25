@@ -29,10 +29,10 @@ class Multitask(Dataset):
             # "FIVES", 
             # "HRF", 
             # "STARE", 
-            # "G1020", 
-            # "GAMMA - task3", 
-            # "ORIGA", 
-            # "Papila", 
+            "G1020", 
+            "GAMMA - task3", 
+            "ORIGA", 
+            "Papila", 
             "REFUGE", 
             # "DDR - lesion_seg", 
             # "FGADR-Seg-set", 
@@ -216,8 +216,8 @@ class Multitask(Dataset):
                 # mask[label_pseudo_lesion == 4] = 7
                 mask = Image.fromarray(np.uint8(mask)).convert('L')
 
-                mask_test = np.array(mask)
-                print(np.unique(mask_test))
+                # mask_test = np.array(mask)
+                # print(np.unique(mask_test))
                 return mask
             else:
                 mask = Image.fromarray(np.uint8(label)).convert('L')
