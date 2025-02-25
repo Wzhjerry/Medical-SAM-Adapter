@@ -1244,7 +1244,7 @@ def build_transform(args, train=False):
                 # transforms.RandomHorizontalFlip(),
                 # transforms.RandomVerticalFlip(),
                 # transforms.RandomResizedCrop(args.size, scale=(0.8, 1.0)),
-                transforms.Resize(args.size),
+                transforms.Resize(256),
                 transforms.ToTensor(),
             ]
         )
@@ -1261,7 +1261,7 @@ def build_transform(args, train=False):
 
         label_transform = transforms.Compose(
             [
-                transforms.Resize(args.size),
+                transforms.Resize(256),
                 transforms.ToTensor(),
             ]
         )
