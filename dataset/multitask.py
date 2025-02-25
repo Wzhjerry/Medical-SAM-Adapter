@@ -26,7 +26,7 @@ class Multitask(Dataset):
         self.args.pseudo_num = 1
         self.args.sub_data = [
             "DRIVE", 
-            # "FIVES", 
+            "FIVES", 
             "HRF", 
             "STARE", 
             # "G1020", 
