@@ -29,10 +29,10 @@ class Multitask(Dataset):
             # "FIVES", 
             # "HRF", 
             # "STARE", 
-            "G1020", 
-            "GAMMA - task3", 
-            "ORIGA", 
-            "Papila", 
+            # "G1020", 
+            # "GAMMA - task3", 
+            # "ORIGA", 
+            # "Papila", 
             "REFUGE", 
             # "DDR - lesion_seg", 
             # "FGADR-Seg-set", 
@@ -220,6 +220,8 @@ class Multitask(Dataset):
                 # print(np.unique(mask_test))
                 return mask
             else:
+                mask = np.zeros_like(label)
+                mask[label > 1] = 1
                 mask = Image.fromarray(np.uint8(label)).convert('L')
                 return mask
     
