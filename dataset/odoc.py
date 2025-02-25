@@ -59,6 +59,7 @@ class ODOC(Dataset):
 
     def __getitem__(self, idx):
         # BGR -> RGB -> PIL
+        point_label = 1
         image = cv2.imread(self.x[idx])[..., ::-1]
         image, ymin, ymax, xmin, xmax = remove_black_edge(image)
         image = cv2.resize(image, (1024, 1024), interpolation=cv2.INTER_CUBIC)
@@ -67,12 +68,14 @@ class ODOC(Dataset):
         # Label
         label = self.read_labels(self.y[idx], name, ymin, ymax, xmin, xmax, self.split)
         
-        im = Image.fromarray(np.uint8(image))
+        im = Image.fromarray(np.uint8(image)).convert('RGB')
 
         # Identical transformations for image and ground truth
         seed = np.random.randint(2147483647)
         torch.manual_seed(seed)
         random.seed(seed)
+
+        point_label, pt = random_click(np.array(label) / 255, point_label)
 
         if self.im_transform is not None:
             im_t = self.im_transform(im)
@@ -83,8 +86,6 @@ class ODOC(Dataset):
             target_t = self.label_transform(label)
             torch.manual_seed(seed)
             random.seed(seed)
-
-        point_label, pt = random_click(np.array(label), point_labels=1)
 
         image_meta_dict = {'filename_or_obj': name}
 
