@@ -68,7 +68,6 @@ class Multitask(Dataset):
         name = self.names[idx]
         # Label
         mask = self.read_labels(self.y[idx], name, ymin, ymax, xmin, xmax, self.split)
-        print(np.unique(mask))
 
         im = Image.fromarray(np.uint8(image))
         mask = Image.fromarray(np.uint8(mask)).convert('L')
