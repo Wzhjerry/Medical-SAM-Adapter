@@ -216,7 +216,7 @@ class Multitask(Dataset):
                 return mask
             else:
                 mask = np.zeros_like(label)
-                mask[np.where(label > 1)] = 255
+                mask[np.where(label > 0)] = 255
                 return mask
     
         # Read labels for lesion seg
