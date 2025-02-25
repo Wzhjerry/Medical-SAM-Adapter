@@ -167,11 +167,11 @@ class Multitask(Dataset):
                 # mask[label_pseudo_lesion == 2] = 5
                 # mask[label_pseudo_lesion == 3] = 6
                 # mask[label_pseudo_lesion == 4] = 7
-                mask = Image.fromarray(np.uint8(mask)).convert('1')
+                mask = Image.fromarray(np.uint8(mask)).convert('L')
 
                 return mask
             else:
-                mask = Image.fromarray(np.uint8(label)).convert('1')
+                mask = Image.fromarray(np.uint8(label)).convert('L')
                 return mask
 
         # Read labels for odoc seg
@@ -211,11 +211,11 @@ class Multitask(Dataset):
                 # mask[label_pseudo_lesion == 2] = 5
                 # mask[label_pseudo_lesion == 3] = 6
                 # mask[label_pseudo_lesion == 4] = 7
-                mask = Image.fromarray(np.uint8(mask)).convert('1')
+                mask = Image.fromarray(np.uint8(mask)).convert('L')
 
                 return mask
             else:
-                mask = Image.fromarray(np.uint8(label)).convert('1')
+                mask = Image.fromarray(np.uint8(label)).convert('L')
                 return mask
     
         # Read labels for lesion seg
@@ -281,11 +281,11 @@ class Multitask(Dataset):
                 # mask[label_pseudo_vessel == 1] = 1
                 mask[label_pseudo_odoc > 1] = 1
                 # mask[label_pseudo_odoc == 2] = 2
-                mask = Image.fromarray(np.uint8(mask)).convert('1')
+                mask = Image.fromarray(np.uint8(mask)).convert('L')
 
                 return mask
             else:
-                mask = Image.fromarray(np.uint8(label)).convert('1')
+                mask = Image.fromarray(np.uint8(label)).convert('L')
                 return mask
 
     def read_images(self, root_dir):
