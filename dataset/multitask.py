@@ -95,6 +95,7 @@ class Multitask(Dataset):
         pt_dict = {}
         p_label_dict = {}        
 
+        print(0)
         mask_np = mask.numpy() if torch.is_tensor(mask) else np.array(mask)
         unique_classes = np.unique(mask_np)
         for cls in unique_classes:
@@ -106,6 +107,7 @@ class Multitask(Dataset):
             point_label, pt = random_click(binary_mask, point_labels=cls)
             pt_dict[cls] = pt
             p_label_dict[cls] = point_label
+        print(1)
 
         image_meta_dict = {'filename_or_obj': name}
 
