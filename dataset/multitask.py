@@ -144,11 +144,17 @@ class Multitask(Dataset):
                 # Read pseudo labels for odoc and lesion
                     
                 label_pseudo_odoc = cv2.imread(f'/data/wangzh/code/retsam/results_val/index_0/task_1/{name}.png')[..., 0]
-                label_pseudo_odoc = cv2.resize(label_pseudo_odoc, (self.args.size, self.args.size), interpolation=cv2.INTER_NEAREST)
+                try:
+                    label_pseudo_odoc = cv2.resize(label_pseudo_odoc, (self.args.size, self.args.size), interpolation=cv2.INTER_NEAREST)
+                except:
+                    print(name)
                 # target_pseudo_odoc = Image.fromarray(np.uint8(label_pseudo_odoc))
             
                 label_pseudo_lesion = cv2.imread(f'/data/wangzh/code/retsam/results_val/index_0/task_2/{name}.png')[..., 0]
-                label_pseudo_lesion = cv2.resize(label_pseudo_lesion, (self.args.size, self.args.size), interpolation=cv2.INTER_NEAREST)
+                try:
+                    label_pseudo_lesion = cv2.resize(label_pseudo_lesion, (self.args.size, self.args.size), interpolation=cv2.INTER_NEAREST)
+                except:
+                    print(name)
                 # target_pseudo_lesion = Image.fromarray(np.uint8(label_pseudo_lesion))
 
                 mask = np.zeros_like(label)
