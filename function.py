@@ -90,8 +90,8 @@ def train_sam(args, net: nn.Module, optimizer, train_loader,
                 point_labels = pack['p_label']
             name = pack['image_meta_dict']['filename_or_obj']
 
-            pt = pt.to(device=GPUdevice)
-            point_labels = point_labels.to(device=GPUdevice)
+            # pt = pt.to(device=GPUdevice)
+            # point_labels = point_labels.to(device=GPUdevice)
 
             if args.thd:
                 imgs, pt, masks = generate_click_prompt(imgs, masks)
@@ -112,17 +112,17 @@ def train_sam(args, net: nn.Module, optimizer, train_loader,
             b_size,c,w,h = imgs.size()
             longsize = w if w >=h else h
 
-            # if point_labels.clone().flatten()[0] != -1:
-            #         # point_coords = samtrans.ResizeLongestSide(longsize).apply_coords(pt, (h, w))
-            #     point_coords = pt
-            #     coords_torch = torch.as_tensor(point_coords, dtype=torch.float, device=GPUdevice)
-            #     labels_torch = torch.as_tensor(point_labels, dtype=torch.int, device=GPUdevice)
-            #     if(len(point_labels.shape)==1): # only one point prompt
-            #         coords_torch, labels_torch, showp = coords_torch[None, :, :], labels_torch[None, :], showp[None, :, :]
-            #     pt = (coords_torch, labels_torch)
+            if point_labels.clone().flatten()[0] != -1:
+                    # point_coords = samtrans.ResizeLongestSide(longsize).apply_coords(pt, (h, w))
+                point_coords = pt
+                coords_torch = torch.as_tensor(point_coords, dtype=torch.float, device=GPUdevice)
+                labels_torch = torch.as_tensor(point_labels, dtype=torch.int, device=GPUdevice)
+                if(len(point_labels.shape)==1): # only one point prompt
+                    coords_torch, labels_torch, showp = coords_torch[None, :, :], labels_torch[None, :], showp[None, :, :]
+                pt = (coords_torch, labels_torch)
             
-            coords_torch = pt  # (b, num_classes, 2)
-            labels_torch = point_labels  # (b, num_classes)
+            # coords_torch = pt  # (b, num_classes, 2)
+            # labels_torch = point_labels  # (b, num_classes)
 
             '''init'''
             if hard:

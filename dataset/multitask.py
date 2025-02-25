@@ -89,40 +89,42 @@ class Multitask(Dataset):
         # Convert mask to NumPy array if it’s a tensor
         mask_np = mask.numpy() if torch.is_tensor(mask) else np.array(mask)
         # Find all unique classes in the mask, excluding background (0)
-        unique_classes = np.unique(mask_np)
-        unique_classes = unique_classes[unique_classes != 0]
+        # unique_classes = np.unique(mask_np)
+        # unique_classes = unique_classes[unique_classes != 0]
 
-        # Lists to store points and labels
-        pt_list = []
-        p_label_list = []
+        # # Lists to store points and labels
+        # pt_list = []
+        # p_label_list = []
 
-        # Generate one point per class
-        for cls in unique_classes:
-            binary_mask = (mask_np == cls).astype(np.uint8)
-            point_label, pt = random_click(binary_mask, point_labels=cls)
-            pt_list.append(pt)
-            p_label_list.append(point_label)
+        # # Generate one point per class
+        # for cls in unique_classes:
+        #     binary_mask = (mask_np == cls).astype(np.uint8)
+        #     point_label, pt = random_click(binary_mask, point_labels=cls)
+        #     pt_list.append(pt)
+        #     p_label_list.append(point_label)
 
-        # Convert lists to tensors
-        # Convert lists to NumPy arrays
-        if pt_list:  # Check if the list is not empty
-            pt_array = np.stack(pt_list)          # Shape: (num_classes, 2)
-            p_label_array = np.array(p_label_list) # Shape: (num_classes,)
-        else:  # Handle the empty case
-            pt_array = np.empty((0, 2), dtype=np.float32)
-            p_label_array = np.empty(0, dtype=np.int64)
+        # # Convert lists to tensors
+        # # Convert lists to NumPy arrays
+        # if pt_list:  # Check if the list is not empty
+        #     pt_array = np.stack(pt_list)          # Shape: (num_classes, 2)
+        #     p_label_array = np.array(p_label_list) # Shape: (num_classes,)
+        # else:  # Handle the empty case
+        #     pt_array = np.empty((0, 2), dtype=np.float32)
+        #     p_label_array = np.empty(0, dtype=np.int64)
 
-        # Convert NumPy arrays to PyTorch tensors
-        pt_tensor = torch.from_numpy(pt_array).to(dtype=torch.float32)
-        p_label_tensor = torch.from_numpy(p_label_array).to(dtype=torch.int64)
+        # # Convert NumPy arrays to PyTorch tensors
+        # pt_tensor = torch.from_numpy(pt_array).to(dtype=torch.float32)
+        # p_label_tensor = torch.from_numpy(p_label_array).to(dtype=torch.int64)
+
+        point_label, pt = random_click(mask_np, point_labels=1)
 
         image_meta_dict = {'filename_or_obj': name}
 
         return {
             'image': im_t,              # Transformed image (tensor)
             'label': target_t,          # Transformed multi-class mask (tensor)
-            'p_label': p_label_tensor,  # Tensor of point labels (num_classes,)
-            'pt': pt_tensor,            # Tensor of points (num_classes, 2)
+            'p_label': point_label,  # Tensor of point labels (num_classes,)
+            'pt': pt,            # Tensor of points (num_classes, 2)
             'image_meta_dict': image_meta_dict,
         }
 
