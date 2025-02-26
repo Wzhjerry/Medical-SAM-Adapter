@@ -70,7 +70,7 @@ class Multitask(Dataset):
         mask = self.read_labels(self.y[idx], name, self.split)
 
         im = Image.fromarray(np.uint8(image))
-        mask = Image.fromarray(np.uint8(mask)).convert('1')
+        mask = Image.fromarray(np.uint8(mask))
 
         newsize = (1024, 1024)
         mask = mask.resize(newsize)
