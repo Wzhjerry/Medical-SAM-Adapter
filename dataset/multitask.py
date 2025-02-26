@@ -298,24 +298,24 @@ class Multitask(Dataset):
     def load_name(self, args, split):
         inputs, targets, names = [], [], []
 
-        # vessel_inputs, vessel_targets, vessel_names = self.load_vessel(args, split)
+        vessel_inputs, vessel_targets, vessel_names = self.load_vessel(args, split)
         ODOC_inputs, ODOC_targets, ODOC_names = self.load_ODOC(args, split)
-        # lesion_inputs, lesion_targets, lesion_names = self.load_lesion(args, split)
+        lesion_inputs, lesion_targets, lesion_names = self.load_lesion(args, split)
 
-        # for i in range(len(vessel_inputs)):
-        #     inputs.append(vessel_inputs[i])
-        #     targets.append([vessel_targets[i], None, None, None, None, None])
-        #     names.append(vessel_names[i])
+        for i in range(len(vessel_inputs)):
+            inputs.append(vessel_inputs[i])
+            targets.append([vessel_targets[i], None, None, None, None, None])
+            names.append(vessel_names[i])
         
         for i in range(len(ODOC_inputs)):
             inputs.append(ODOC_inputs[i])
             targets.append([None, ODOC_targets[i], None, None, None, None])
             names.append(ODOC_names[i])
 
-        # for i in range(len(lesion_inputs)):
-        #     inputs.append(lesion_inputs[i])
-        #     targets.append([None, None, lesion_targets[0][i], lesion_targets[1][i], lesion_targets[2][i], lesion_targets[3][i]])
-        #     names.append(lesion_names[i])
+        for i in range(len(lesion_inputs)):
+            inputs.append(lesion_inputs[i])
+            targets.append([None, None, lesion_targets[0][i], lesion_targets[1][i], lesion_targets[2][i], lesion_targets[3][i]])
+            names.append(lesion_names[i])
         
         inputs = np.array(inputs)
         targets = np.array(targets)
