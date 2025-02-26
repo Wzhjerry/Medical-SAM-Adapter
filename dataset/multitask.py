@@ -25,18 +25,18 @@ class Multitask(Dataset):
         self.args.size = 1024
         self.args.pseudo_num = 1
         self.args.sub_data = [
-            "DRIVE", 
-            "FIVES", 
-            "HRF", 
-            "STARE", 
+            # "DRIVE", 
+            # "FIVES", 
+            # "HRF", 
+            # "STARE", 
             # "G1020", 
             # "GAMMA - task3", 
             # "ORIGA", 
             # "Papila", 
             # "REFUGE", 
-            # "DDR - lesion_seg", 
-            # "FGADR-Seg-set", 
-            # "IDRiD"
+            "DDR - lesion_seg", 
+            "FGADR-Seg-set", 
+            "IDRiD"
         ]
 
         self.x, self.y, self.names = self.load_name(args, split)
@@ -160,10 +160,10 @@ class Multitask(Dataset):
                 # target_pseudo_lesion = Image.fromarray(np.uint8(label_pseudo_lesion))
 
                 mask = np.zeros_like(label)
-                mask[label > 0] = 255
+                # mask[label > 0] = 255
                 # mask[label_pseudo_odoc > 1] = 1
                 # mask[label_pseudo_odoc == 2] = 2
-                # mask[label_pseudo_lesion == 1] = 4
+                mask[label_pseudo_lesion == 1] = 255
                 # mask[label_pseudo_lesion == 2] = 5
                 # mask[label_pseudo_lesion == 3] = 6
                 # mask[label_pseudo_lesion == 4] = 7
@@ -202,10 +202,10 @@ class Multitask(Dataset):
                 # target_pseudo_lesion = Image.fromarray(np.uint8(label_pseudo_lesion))
 
                 mask = np.zeros_like(label)
-                mask[np.where(label > 0)] = 255
+                # mask[np.where(label > 0)] = 255
                 # mask[label == 2] = 2
                 # mask[label_pseudo_vessel == 1] = 1
-                # mask[label_pseudo_lesion == 1] = 4
+                mask[label_pseudo_lesion == 1] = 255
                 # mask[label_pseudo_lesion == 2] = 5
                 # mask[label_pseudo_lesion == 3] = 6
                 # mask[label_pseudo_lesion == 4] = 7
@@ -272,18 +272,18 @@ class Multitask(Dataset):
                 # target_pseudo_odoc = Image.fromarray(np.uint8(label_pseudo_odoc))
 
                 mask = np.zeros_like(label)
-                # mask[label == 1] = 4
+                mask[label == 1] = 255
                 # mask[label == 2] = 5
                 # mask[label == 3] = 6
                 # mask[label == 4] = 7
                 # mask[label_pseudo_vessel == 1] = 1
-                mask[label_pseudo_odoc > 1] = 1
+                # mask[label_pseudo_odoc > 1] = 1
                 # mask[label_pseudo_odoc == 2] = 2
-                mask = Image.fromarray(np.uint8(mask)).convert('L')
 
                 return mask
             else:
-                mask = Image.fromarray(np.uint8(label)).convert('L')
+                mask = np.zeros_like(label)
+                mask[label == 1] = 255
                 return mask
 
     def read_images(self, root_dir):
