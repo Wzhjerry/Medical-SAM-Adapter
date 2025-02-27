@@ -57,7 +57,7 @@ class OD(Dataset):
         newsize = (1024, 1024)
         mask = mask.resize(newsize)
 
-        point_label, pt = random_click(np.array(mask) / 255, point_label=1)
+        point_label, pt = random_click(np.array(mask) / 255, point_labels=1)
 
         # Identical transformations for image and ground truth
         seed = np.random.randint(2147483647)
