@@ -359,7 +359,7 @@ def validation_sam(args, val_loader, epoch, net: nn.Module, clean_dir=True):
                     tot += lossfunc(pred, masks)
 
                     for idx, name in enumerate(names):
-                        save_path = os.path.join(os.path.split(args.sam_ckpt)[0], 'visual')
+                        save_path = os.path.join(os.path.split(args.weights)[0], 'visual')
                         # save_path = os.path.join(args.sam_ckpt, 'visual')
                         if not os.path.exists(save_path):
                             os.makedirs(save_path)
