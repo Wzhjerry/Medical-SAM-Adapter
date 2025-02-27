@@ -176,34 +176,28 @@ class Multitask(Dataset):
 
         # Read labels for odoc seg
         elif root_dirs[1] is not None:
-            # print('return label for odoc seg')
             label = Image.open(root_dirs[1])
             label = np.array(label).astype(np.uint8)
             if len(label.shape) == 3:
                 label = label[..., 0]
-            # label = label[ymin:ymax, xmin:xmax]
-            label[(label > 0) & (label < 255)] = 1
-            label[label == 255] = 2
+            label[(label > 0) & (label < 255)] = 0
+            label[label == 255] = 1
             label = cv2.resize(label, (1024, 1024), interpolation=cv2.INTER_NEAREST)
-            # label = label.resize((1024, 1024))
 
             # Convert label from numpy to Image
             # target = Image.fromarray(np.uint8(label))
 
             if not split == 'test':
-                # Read pseudo labels for odoc and lesion
                 
                 label_pseudo_vessel = cv2.imread(f'/data/wangzh/code/retsam/results_val/index_0/task_0/{name}.png')[..., 0]
                 label_pseudo_vessel = cv2.resize(label_pseudo_vessel, (1024, 1024), interpolation=cv2.INTER_NEAREST)
-                # target_pseudo_vessel = Image.fromarray(np.uint8(label_pseudo_vessel))
             
                 label_pseudo_lesion = cv2.imread(f'/data/wangzh/code/retsam/results_val/index_0/task_2/{name}.png')[..., 0]
                 label_pseudo_lesion = cv2.resize(label_pseudo_lesion, (1024, 1024), interpolation=cv2.INTER_NEAREST)
-                # target_pseudo_lesion = Image.fromarray(np.uint8(label_pseudo_lesion))
 
                 mask = np.zeros_like(label)
-                # mask[np.where(label > 0)] = 255
-                mask[label == 2] = 255
+                mask[np.where(label > 0)] = 255
+                # mask[label == 2] = 255
                 # mask[label_pseudo_vessel == 1] = 1
                 # mask[label_pseudo_lesion == 1] = 255
                 # mask[label_pseudo_lesion == 2] = 5
