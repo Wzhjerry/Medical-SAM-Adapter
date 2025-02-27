@@ -1089,7 +1089,6 @@ def eval_seg(pred,true_mask_p,threshold):
             
         return tuple(np.array(ious + dices) / len(threshold)) # tuple has a total number of c * 2
     else:
-        print('channel number is wrong')
         eiou, edice = 0,0
         for th in threshold:
 
