@@ -71,7 +71,7 @@ class EX(Dataset):
 
         return {
             'image': im_t,              # Transformed image (tensor)
-            'mask': target_t,          # Transformed multi-class mask (tensor)
+            'laebl': target_t,          # Transformed multi-class mask (tensor)
             'p_label': point_label,  # Tensor of point labels (num_classes,)
             'pt': pt,            # Tensor of points (num_classes, 2)
             'image_meta_dict': image_meta_dict,
