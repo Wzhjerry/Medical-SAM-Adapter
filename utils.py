@@ -1101,7 +1101,7 @@ def eval_seg(pred,true_mask_p,threshold):
     
             dsc = dc(disc_pred, disc_mask)
             iou = jc(disc_pred, disc_mask)
-            if not dsc == 1:
+            if not dsc == 1 and not dsc == 0:
                 '''iou for numpy'''
                 eiou += iou
 
