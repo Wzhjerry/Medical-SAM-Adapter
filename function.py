@@ -358,7 +358,6 @@ def validation_sam(args, val_loader, epoch, net: nn.Module, clean_dir=True):
                     pred = F.interpolate(pred,size=(args.out_size,args.out_size))
                     tot += lossfunc(pred, masks)
                     pred = (pred > 0.5).float()
-                    pred[np.where(pred > 0)] = 1
 
                     for idx, name in enumerate(names):
                         save_path = os.path.join(os.path.split(args.weights)[0], 'visual')
