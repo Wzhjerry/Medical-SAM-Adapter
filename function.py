@@ -360,7 +360,7 @@ def validation_sam(args, val_loader, epoch, net: nn.Module, clean_dir=True):
                     pred = (pred > 0.5).float()
 
                     for idx, name in enumerate(names):
-                        save_path = os.path.join(os.path.split(args.weights)[0], 'visual')
+                        save_path = os.path.join('/data/wangzh/retsam2/visual', args.exp_name)
                         # save_path = os.path.join(args.sam_ckpt, 'visual')
                         if not os.path.exists(save_path):
                             os.makedirs(save_path)
