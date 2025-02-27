@@ -20,6 +20,7 @@ from .toothfairy import ToothFairy
 from .wbc import WBC
 from .multitask import Multitask
 from .odoc import ODOC
+from .relabel import Relabel
 
 
 def get_dataloader(args):
@@ -60,6 +61,14 @@ def get_dataloader(args):
         nice_train_loader = DataLoader(multitask_train_dataset, batch_size=args.b, shuffle=True, num_workers=8, pin_memory=True)
         nice_test_loader = DataLoader(multitask_test_dataset, batch_size=args.b, shuffle=False, num_workers=8, pin_memory=True)
         '''end'''
+    
+    elif args.dataset == 'relabel':
+        '''relabel data'''
+        relabel_train_dataset = Relabel(args, split='train')
+        relabel_test_dataset = Relabel(args, split='val')
+
+        nice_train_loader = DataLoader(relabel_train_dataset, batch_size=args.b, shuffle=True, num_workers=8, pin_memory=True)
+        nice_test_loader = DataLoader(relabel_test_dataset, batch_size=args.b, shuffle=False, num_workers=8, pin_memory=True)
     
     elif args.dataset == 'odoc':
         '''odoc data'''
