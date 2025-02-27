@@ -21,6 +21,11 @@ from .wbc import WBC
 from .multitask import Multitask
 from .odoc import ODOC
 from .relabel import Relabel
+from .vessel import Vessel
+from .od import OD
+from .oc import OC
+from .ex import EX
+from .he import HE
 
 
 def get_dataloader(args):
@@ -78,6 +83,50 @@ def get_dataloader(args):
         nice_train_loader = DataLoader(odoc_train_dataset, batch_size=args.b, shuffle=True, num_workers=8, pin_memory=True)
         nice_test_loader = DataLoader(odoc_test_dataset, batch_size=args.b, shuffle=False, num_workers=8, pin_memory=True)
         '''end'''
+
+    elif args.dataset == 'vessel':
+        '''vessel data'''
+        vessel_train_dataset = Vessel(args, split='train')
+        vessel_test_dataset = Vessel(args, split='val')
+
+        nice_train_loader = DataLoader(vessel_train_dataset, batch_size=args.b, shuffle=True, num_workers=8, pin_memory=True)
+        nice_test_loader = DataLoader(vessel_test_dataset, batch_size=args.b, shuffle=False, num_workers=8, pin_memory=True)
+        '''end'''
+    
+    elif args.dataset == 'od':
+        '''od data'''
+        od_train_dataset = OD(args, split='train')
+        od_test_dataset = OD(args, split='val')
+
+        nice_train_loader = DataLoader(od_train_dataset, batch_size=args.b, shuffle=True, num_workers=8, pin_memory=True)
+        nice_test_loader = DataLoader(od_test_dataset, batch_size=args.b, shuffle=False, num_workers=8, pin_memory=True)
+        '''end'''
+    
+    elif args.dataset == 'oc':
+        '''oc data'''
+        oc_train_dataset = OC(args, split='train')
+        oc_test_dataset = OC(args, split='val')
+
+        nice_train_loader = DataLoader(oc_train_dataset, batch_size=args.b, shuffle=True, num_workers=8, pin_memory=True)
+        nice_test_loader = DataLoader(oc_test_dataset, batch_size=args.b, shuffle=False, num_workers=8, pin_memory=True)
+        '''end'''
+    
+    elif args.dataset == 'ex':
+        '''ex data'''
+        ex_train_dataset = EX(args, split='train')
+        ex_test_dataset = EX(args, split='val')
+
+        nice_train_loader = DataLoader(ex_train_dataset, batch_size=args.b, shuffle=True, num_workers=8, pin_memory=True)
+        nice_test_loader = DataLoader(ex_test_dataset, batch_size=args.b, shuffle=False, num_workers=8, pin_memory=True)
+        '''end'''
+    
+    elif args.dataset == 'he':
+        '''he data'''
+        he_train_dataset = HE(args, split='train')
+        he_test_dataset = HE(args, split='val')
+
+        nice_train_loader = DataLoader(he_train_dataset, batch_size=args.b, shuffle=True, num_workers=8, pin_memory=True)
+        nice_test_loader = DataLoader(he_test_dataset, batch_size=args.b, shuffle=False, num_workers=8, pin_memory=True)
 
     elif args.dataset == 'decathlon':
         nice_train_loader, nice_test_loader, transform_train, transform_val, train_list, val_list = get_decath_loader(args)
