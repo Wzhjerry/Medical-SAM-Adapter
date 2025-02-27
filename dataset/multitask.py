@@ -29,14 +29,14 @@ class Multitask(Dataset):
             # "FIVES", 
             # "HRF", 
             # "STARE", 
-            # "G1020", 
-            # "GAMMA - task3", 
-            # "ORIGA", 
-            # "Papila", 
-            # "REFUGE", 
-            "DDR - lesion_seg", 
-            "FGADR-Seg-set", 
-            "IDRiD"
+            "G1020", 
+            "GAMMA - task3", 
+            "ORIGA", 
+            "Papila", 
+            "REFUGE", 
+            # "DDR - lesion_seg", 
+            # "FGADR-Seg-set", 
+            # "IDRiD"
         ]
 
         self.x, self.y, self.names = self.load_name(args, split)
@@ -202,10 +202,10 @@ class Multitask(Dataset):
                 # target_pseudo_lesion = Image.fromarray(np.uint8(label_pseudo_lesion))
 
                 mask = np.zeros_like(label)
-                # mask[np.where(label > 0)] = 255
+                mask[np.where(label > 0)] = 255
                 # mask[label == 2] = 2
                 # mask[label_pseudo_vessel == 1] = 1
-                mask[label_pseudo_lesion == 1] = 255
+                # mask[label_pseudo_lesion == 1] = 255
                 # mask[label_pseudo_lesion == 2] = 5
                 # mask[label_pseudo_lesion == 3] = 6
                 # mask[label_pseudo_lesion == 4] = 7
