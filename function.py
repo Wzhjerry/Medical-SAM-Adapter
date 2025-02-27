@@ -258,7 +258,7 @@ def validation_sam(args, val_loader, epoch, net: nn.Module, clean_dir=True):
             else:
                 ptw = pack['pt']
                 point_labels = pack['p_label']
-            name = pack['image_meta_dict']['filename_or_obj']
+            names = pack['image_meta_dict']['filename_or_obj']
             
             buoy = 0
             if args.evl_chunk:
@@ -357,6 +357,17 @@ def validation_sam(args, val_loader, epoch, net: nn.Module, clean_dir=True):
                     # Resize to the ordered output size
                     pred = F.interpolate(pred,size=(args.out_size,args.out_size))
                     tot += lossfunc(pred, masks)
+
+                    for idx, name in enumerate(names):
+                        save_path = os.path.join(os.path.split(args.sam_ckpt)[0], 'visual')
+                        # save_path = os.path.join(args.sam_ckpt, 'visual')
+                        if not os.path.exists(save_path):
+                            os.makedirs(save_path)
+                        save_name = os.path.join(save_path, name + '.png')
+                        save_pred = pred[idx].squeeze().cpu().numpy()
+                        save_pred = cv2.resize(save_pred, (640, 640), interpolation=cv2.INTER_NEAREST)
+                        save_pred = (save_pred * 255).astype('uint8')
+                        cv2.imwrite(save_name, save_pred)
 
                     '''vis images'''
                     # if ind % args.vis == 0:
