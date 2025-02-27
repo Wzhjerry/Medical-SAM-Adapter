@@ -54,6 +54,7 @@ from torch.utils.data import DataLoader
 # from lucent.misc.io import show
 from torchvision.models import vgg19
 from tqdm import tqdm
+from medpy.metric.binary import dc, jc
 
 import cfg
 # from precpt import run_precpt
@@ -1098,11 +1099,14 @@ def eval_seg(pred,true_mask_p,threshold):
 
             disc_mask = gt_vmask_p [:,0,:,:].squeeze(1).cpu().numpy().astype('int32')
     
-            '''iou for numpy'''
-            eiou += iou(disc_pred,disc_mask)
+            dsc = dc(disc_pred, disc_mask)
+            iou = jc(disc_pred, disc_mask)
+            if not dsc == 1 and not dsc == 0:
+                '''iou for numpy'''
+                eiou += iou
 
-            '''dice for torch'''
-            edice += dice_coeff(vpred[:,0,:,:], gt_vmask_p[:,0,:,:]).item()
+                '''dice for torch'''
+                edice += dsc
             
         return eiou / len(threshold), edice / len(threshold)
 
