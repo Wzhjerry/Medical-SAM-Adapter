@@ -29,14 +29,14 @@ class Multitask(Dataset):
             # "FIVES", 
             # "HRF", 
             # "STARE", 
-            "G1020", 
-            "GAMMA - task3", 
-            "ORIGA", 
-            "Papila", 
-            "REFUGE", 
-            # "DDR - lesion_seg", 
-            # "FGADR-Seg-set", 
-            # "IDRiD"
+            # "G1020", 
+            # "GAMMA - task3", 
+            # "ORIGA", 
+            # "Papila", 
+            # "REFUGE", 
+            "DDR - lesion_seg", 
+            "FGADR-Seg-set", 
+            "IDRiD"
         ]
 
         self.x, self.y, self.names = self.load_name(args, split)
