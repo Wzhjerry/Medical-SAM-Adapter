@@ -7,7 +7,7 @@ import glob
 from PIL import Image
 from torch.utils.data import Dataset
 from tqdm import tqdm
-from func_2d.utils import build_transform, random_click
+from utils import build_transform, random_click
 from sklearn.model_selection import KFold
 from torchvision.transforms import functional as F
 import pandas as pd
@@ -64,7 +64,7 @@ class Relabel(Dataset):
         newsize = (1024, 1024)
         mask = mask.resize(newsize)
 
-        point_label, pt = random_click(np.array(mask) / 255, point_label=1)
+        point_label, pt = random_click(np.array(mask) / 255, point_labels=1)
 
         # identical transformation for im and gt
         seed = np.random.randint(2147483647)
