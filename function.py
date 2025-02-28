@@ -238,7 +238,7 @@ def validation_sam(args, val_loader, epoch, net: nn.Module, clean_dir=True):
     rater_res = [(0,0,0,0) for _ in range(6)]
     tot = 0
     hard = 0
-    threshold = (0.75, 0.75)
+    threshold = (0.8, 0.8)
     GPUdevice = torch.device('cuda:' + str(args.gpu_device))
     device = GPUdevice
 
@@ -357,7 +357,7 @@ def validation_sam(args, val_loader, epoch, net: nn.Module, clean_dir=True):
                     # Resize to the ordered output size
                     pred = F.interpolate(pred,size=(args.out_size,args.out_size))
                     tot += lossfunc(pred, masks)
-                    pred = (pred > 0.75).float()
+                    pred = (pred > 0.8).float()
 
                     for idx, name in enumerate(names):
                         save_path = os.path.join('/data/wangzh/medsam-adapter/visual', args.exp_name)
