@@ -63,6 +63,9 @@ class OD(Dataset):
             label, pt = random_click(np.array(mask) / 255, point_labels=1)  # Example function
             pts.append(pt)  # [x, y]
             point_labels.append(label)  # 1 or 0
+        
+        pts = np.array(pts)
+        point_labels = np.array(point_labels)
 
         # Identical transformations for image and ground truth
         seed = np.random.randint(2147483647)
