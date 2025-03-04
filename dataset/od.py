@@ -57,7 +57,12 @@ class OD(Dataset):
         newsize = (1024, 1024)
         mask = mask.resize(newsize)
 
-        point_label, pt = random_click(np.array(mask) / 255, point_labels=1)
+        pts = []
+        point_labels = []
+        for _ in range(3):  # Generate 3 points
+            label, pt = random_click(np.array(mask) / 255, label_type=1)  # Example function
+            pts.append(pt)  # [x, y]
+            point_labels.append(label)  # 1 or 0
 
         # Identical transformations for image and ground truth
         seed = np.random.randint(2147483647)
@@ -74,168 +79,26 @@ class OD(Dataset):
         return {
             'image': im_t,              # Transformed image (tensor)
             'label': target_t,          # Transformed multi-class mask (tensor)
-            'p_label': point_label,  # Tensor of point labels (num_classes,)
-            'pt': pt,            # Tensor of points (num_classes, 2)
+            'p_label': torch.tensor(point_labels, dtype=torch.int64),  # Tensor of point labels (num_classes,)
+            'pt': torch.tensor(pts, dtype=torch.float32),            # Tensor of points (num_classes, 2)
             'image_meta_dict': image_meta_dict,
         }
 
     def read_labels(self, root_dirs, name, split):
         # Read labels for vessel seg
-        if root_dirs[0] is not None:
-            # print('return label for vessel seg')
-            label = Image.open(root_dirs[0])
-            label = np.array(label).astype(np.uint8)
-            if len(label.shape) == 3:
-                label = label[..., 0]
-            # label = label[ymin:ymax, xmin:xmax]
-            label = cv2.resize(label, (1024, 1024), interpolation=cv2.INTER_NEAREST)
+        # print('return label for odoc seg')
+        label = Image.open(root_dirs[1])
+        label = np.array(label).astype(np.uint8)
+        if len(label.shape) == 3:
+            label = label[..., 0]
+        # label = label[ymin:ymax, xmin:xmax]
+        label[(label > 0) & (label < 255)] = 1
+        label[label == 255] = 1
+        label = cv2.resize(label, (1024, 1024), interpolation=cv2.INTER_NEAREST)
 
-            # Convert label from numpy to Image
-            # target = Image.fromarray(np.uint8(label)).convert('1')
-
-            if not split == 'test':
-                # Read pseudo labels for odoc and lesion
-                    
-                label_pseudo_odoc = cv2.imread(f'/data/wangzh/code/retsam/results_val/index_0/task_1/{name}.png')[..., 0]
-                try:
-                    label_pseudo_odoc = cv2.resize(label_pseudo_odoc, (1024, 1024), interpolation=cv2.INTER_NEAREST)
-                except:
-                    print(name)
-                # target_pseudo_odoc = Image.fromarray(np.uint8(label_pseudo_odoc))
-            
-                label_pseudo_lesion = cv2.imread(f'/data/wangzh/code/retsam/results_val/index_0/task_2/{name}.png')[..., 0]
-                try:
-                    label_pseudo_lesion = cv2.resize(label_pseudo_lesion, (1024, 1024), interpolation=cv2.INTER_NEAREST)
-                except:
-                    print(name)
-                # target_pseudo_lesion = Image.fromarray(np.uint8(label_pseudo_lesion))
-
-                mask = np.zeros_like(label)
-                mask[label > 0] = 255
-                # mask[label_pseudo_odoc > 1] = 1
-                # mask[label_pseudo_odoc == 2] = 2
-                # mask[label_pseudo_lesion == 1] = 255
-                # mask[label_pseudo_lesion == 2] = 5
-                # mask[label_pseudo_lesion == 3] = 6
-                # mask[label_pseudo_lesion == 4] = 7
-
-                return mask
-            else:
-                mask = np.zeros_like(label)
-                mask[label > 0] = 255
-                return mask
-
-        # Read labels for odoc seg
-        elif root_dirs[1] is not None:
-            # print('return label for odoc seg')
-            label = Image.open(root_dirs[1])
-            label = np.array(label).astype(np.uint8)
-            if len(label.shape) == 3:
-                label = label[..., 0]
-            # label = label[ymin:ymax, xmin:xmax]
-            label[(label > 0) & (label < 255)] = 1
-            label[label == 255] = 1
-            label = cv2.resize(label, (1024, 1024), interpolation=cv2.INTER_NEAREST)
-            # label = label.resize((1024, 1024))
-
-            # Convert label from numpy to Image
-            # target = Image.fromarray(np.uint8(label))
-
-            if not split == 'test':
-                # Read pseudo labels for odoc and lesion
-                
-                label_pseudo_vessel = cv2.imread(f'/data/wangzh/code/retsam/results_val/index_0/task_0/{name}.png')[..., 0]
-                label_pseudo_vessel = cv2.resize(label_pseudo_vessel, (1024, 1024), interpolation=cv2.INTER_NEAREST)
-                # target_pseudo_vessel = Image.fromarray(np.uint8(label_pseudo_vessel))
-            
-                label_pseudo_lesion = cv2.imread(f'/data/wangzh/code/retsam/results_val/index_0/task_2/{name}.png')[..., 0]
-                label_pseudo_lesion = cv2.resize(label_pseudo_lesion, (1024, 1024), interpolation=cv2.INTER_NEAREST)
-                # target_pseudo_lesion = Image.fromarray(np.uint8(label_pseudo_lesion))
-
-                mask = np.zeros_like(label)
-                mask[np.where(label > 0)] = 255
-                # mask[label == 2] = 2
-                # mask[label_pseudo_vessel == 1] = 255
-                # mask[label_pseudo_lesion == 1] = 255
-                # mask[label_pseudo_lesion == 2] = 5
-                # mask[label_pseudo_lesion == 3] = 6
-                # mask[label_pseudo_lesion == 4] = 7
-
-                return mask
-            else:
-                mask = np.zeros_like(label)
-                mask[np.where(label > 0)] = 255
-                return mask
-    
-        # Read labels for lesion seg
-        else:
-            label_ex = Image.open(root_dirs[2]) if root_dirs[2] is not None else np.zeros((1024, 1024), dtype=np.uint8)
-            label_he = Image.open(root_dirs[3]) if root_dirs[3] is not None else np.zeros((1024, 1024), dtype=np.uint8)
-            label_ma = Image.open(root_dirs[4]) if root_dirs[4] is not None else np.zeros((1024, 1024), dtype=np.uint8)
-            label_se = Image.open(root_dirs[5]) if root_dirs[5] is not None else np.zeros((1024, 1024), dtype=np.uint8)
-
-            label_ex = np.array(label_ex).astype(np.uint8)
-            label_he = np.array(label_he).astype(np.uint8)
-            label_ma = np.array(label_ma).astype(np.uint8)
-            label_se = np.array(label_se).astype(np.uint8)
-
-            if len(label_ex.shape) == 3:
-                label_ex = label_ex[..., 0]
-            if len(label_he.shape) == 3:
-                label_he = label_he[..., 0]
-            if len(label_ma.shape) == 3:
-                label_ma = label_ma[..., 0]
-            if len(label_se.shape) == 3:
-                label_se = label_se[..., 0]
-            
-            # try:
-            #     label_ex = label_ex[ymin:ymax, xmin:xmax] if root_dirs[2] is not None else np.zeros((1024, 1024), dtype=np.uint8)
-            #     label_he = label_he[ymin:ymax, xmin:xmax] if root_dirs[3] is not None else np.zeros((1024, 1024), dtype=np.uint8)
-            #     label_ma = label_ma[ymin:ymax, xmin:xmax] if root_dirs[4] is not None else np.zeros((1024, 1024), dtype=np.uint8)
-            #     label_se = label_se[ymin:ymax, xmin:xmax] if root_dirs[5] is not None else np.zeros((1024, 1024), dtype=np.uint8)
-            # except:
-            #     print(root_dirs)
-            
-            label_ex = cv2.resize(label_ex, (1024, 1024), interpolation=cv2.INTER_NEAREST)
-            label_he = cv2.resize(label_he, (1024, 1024), interpolation=cv2.INTER_NEAREST)
-            label_ma = cv2.resize(label_ma, (1024, 1024), interpolation=cv2.INTER_NEAREST)
-            label_se = cv2.resize(label_se, (1024, 1024), interpolation=cv2.INTER_NEAREST)
-
-            label = np.zeros((label_ex.shape[0], label_ex.shape[1]), dtype=np.uint8)
-            label[np.where(label_ex == 255)] = 1
-            label[np.where(label_he == 255)] = 2
-            label[np.where(label_ma == 255)] = 3
-            label[np.where(label_se == 255)] = 4
-
-            label = cv2.resize(label, (1024, 1024), interpolation=cv2.INTER_NEAREST)
-
-            # Convert label from numpy to Image
-            # target = Image.fromarray(np.uint8(label))
-
-            if not split == 'test':
-                # Read pseudo labels for vessel and odoc
-                label_pseudo_vessel = cv2.imread(f'/data/wangzh/code/retsam/results_val/index_0/task_0/{name}.png')[..., 0]
-                label_pseudo_vessel = cv2.resize(label_pseudo_vessel, (1024, 1024), interpolation=cv2.INTER_NEAREST)
-                # target_pseudo_vessel = Image.fromarray(np.uint8(label_pseudo_vessel))
-            
-                label_pseudo_odoc = cv2.imread(f'/data/wangzh/code/retsam/results_val/index_0/task_1/{name}.png')[..., 0]
-                label_pseudo_odoc = cv2.resize(label_pseudo_odoc, (1024, 1024), interpolation=cv2.INTER_NEAREST)
-                # target_pseudo_odoc = Image.fromarray(np.uint8(label_pseudo_odoc))
-
-                mask = np.zeros_like(label)
-                # mask[label == 1] = 255
-                mask[label == 2] = 255
-                # mask[label == 3] = 6
-                # mask[label == 4] = 7
-                # mask[label_pseudo_vessel == 1] = 255
-                # mask[label_pseudo_odoc > 1] = 1
-                # mask[label_pseudo_odoc == 2] = 2
-
-                return mask
-            else:
-                mask = np.zeros_like(label)
-                mask[label == 2] = 255
-                return mask
+        mask = np.zeros_like(label)
+        mask[np.where(label > 0)] = 255
+        return mask
 
     def read_images(self, root_dir):
         image_paths = []

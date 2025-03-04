@@ -120,9 +120,9 @@ def train_sam(args, net: nn.Module, optimizer, train_loader,
                 if(len(point_labels.shape)==1): # only one point prompt
                     coords_torch, labels_torch, showp = coords_torch[None, :, :], labels_torch[None, :], showp[None, :, :]
                 pt = (coords_torch, labels_torch)
-            
-            # coords_torch = pt  # (b, num_classes, 2)
-            # labels_torch = point_labels  # (b, num_classes)
+            else:
+                coords_torch = pt  # (b, num_classes, 2)
+                labels_torch = point_labels  # (b, num_classes)
 
             '''init'''
             if hard:
