@@ -60,7 +60,7 @@ class OD(Dataset):
         pts = []
         point_labels = []
         for _ in range(3):  # Generate 3 points
-            label, pt = random_click(np.array(mask) / 255, label_type=1)  # Example function
+            label, pt = random_click(np.array(mask) / 255, point_labels=1)  # Example function
             pts.append(pt)  # [x, y]
             point_labels.append(label)  # 1 or 0
 
