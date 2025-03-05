@@ -356,6 +356,7 @@ def validation_sam(args, val_loader, epoch, net: nn.Module, clean_dir=True):
 
                     # Resize to the ordered output size
                     pred = F.interpolate(pred, size=(args.out_size,args.out_size))
+                    print(pred.size(), masks.size())
                     tot += lossfunc(pred, masks)
                     if pred.size(1) == 2:
                         pred = torch.argmax(pred, dim=1, keepdim=True)
