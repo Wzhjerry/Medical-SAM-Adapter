@@ -24,18 +24,10 @@ class ODOC(Dataset):
         self.args = args
         self.args.size = 1024
         self.args.sub_data = [
-            # "DRIVE", 
-            # "FIVES", 
-            # "HRF", 
-            # "STARE", 
             "G1020", 
             "GAMMA - task3", 
             "ORIGA", 
             "Papila", 
-            "REFUGE", 
-            # "DDR - lesion_seg", 
-            # "FGADR-Seg-set", 
-            # "IDRiD"
         ]
 
         self.x, self.y, self.names = self.load_name(args, split)
@@ -76,7 +68,18 @@ class ODOC(Dataset):
         newsize = (1024, 1024)
         mask = mask.resize(newsize)
 
-        point_label, pt = random_click(np.array(mask) / 255, point_label)
+        mask_point = np.array(mask).astype(np.uint8)
+        mask_point[mask_point > 0] = 1
+
+        pts = []
+        point_labels = []
+        for _ in range(3):  # Generate 3 points
+            label, pt = random_click(mask_point, point_labels=1)  # Example function
+            pts.append(pt)  # [x, y]
+            point_labels.append(label)  # 1 or 0
+        
+        pts = np.array(pts)
+        point_labels = np.array(point_labels)
 
         # Identical transformations for image and ground truth
         seed = np.random.randint(2147483647)

@@ -105,7 +105,7 @@ def _build_sam(
             state_dict = torch.load(f)
         sam.load_state_dict(state_dict,strict=False)
     return sam
-    
+
 def build_sam_vit_t_encoder(checkpoint=None):
     mobile_sam =TinyViT(img_size=1024, in_chans=3, num_classes=1000,
                 embed_dims=[64, 128, 160, 320],

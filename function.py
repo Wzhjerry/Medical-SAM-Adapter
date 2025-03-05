@@ -44,7 +44,8 @@ args = cfg.parse_args()
 
 GPUdevice = torch.device('cuda', args.gpu_device)
 pos_weight = torch.ones([1]).cuda(device=GPUdevice)*2
-criterion_G = torch.nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+# criterion_G = torch.nn.BCEWithLogitsLoss(pos_weight=pos_weight)
+criterion_G = torch.nn.CrossEntropyLoss()
 seed = torch.randint(1,11,(args.b,7))
 
 torch.backends.cudnn.benchmark = True
@@ -198,7 +199,8 @@ def train_sam(args, net: nn.Module, optimizer, train_loader,
                 )
                 
             # Resize to the ordered output size
-            pred = F.interpolate(pred,size=(args.out_size,args.out_size))
+            pred = F.interpolate(pred, size=(args.out_size,args.out_size))
+            print("Pred size:", pred.size(), "Mask size:", masks.size())
 
             loss = lossfunc(pred, masks)
 
@@ -355,20 +357,23 @@ def validation_sam(args, val_loader, epoch, net: nn.Module, clean_dir=True):
                         )
 
                     # Resize to the ordered output size
-                    pred = F.interpolate(pred,size=(args.out_size,args.out_size))
+                    pred = F.interpolate(pred, size=(args.out_size,args.out_size))
                     tot += lossfunc(pred, masks)
-                    pred = (pred > 0.5).float()
+                    if pred.size(1) == 2:
+                        pred = torch.argmax(pred, dim=1, keepdim=True)
+                    else:
+                        pred = (pred > 0.5).float()
 
-                    for idx, name in enumerate(names):
-                        save_path = os.path.join('/data/wangzh/medsam-adapter/visual', args.exp_name)
-                        # save_path = os.path.join(args.sam_ckpt, 'visual')
-                        if not os.path.exists(save_path):
-                            os.makedirs(save_path)
-                        save_name = os.path.join(save_path, name + '.png')
-                        save_pred = pred[idx].squeeze().cpu().numpy()
-                        save_pred = cv2.resize(save_pred, (640, 640), interpolation=cv2.INTER_NEAREST)
-                        save_pred = (save_pred * 255).astype('uint8')
-                        cv2.imwrite(save_name, save_pred)
+                    # for idx, name in enumerate(names):
+                    #     save_path = os.path.join('/data/wangzh/medsam-adapter/visual', args.exp_name)
+                    #     # save_path = os.path.join(args.sam_ckpt, 'visual')
+                    #     if not os.path.exists(save_path):
+                    #         os.makedirs(save_path)
+                    #     save_name = os.path.join(save_path, name + '.png')
+                    #     save_pred = pred[idx].squeeze().cpu().numpy()
+                    #     save_pred = cv2.resize(save_pred, (640, 640), interpolation=cv2.INTER_NEAREST)
+                    #     save_pred = (save_pred * 255).astype('uint8')
+                    #     cv2.imwrite(save_name, save_pred)
 
                     '''vis images'''
                     # if ind % args.vis == 0:
