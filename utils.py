@@ -1135,8 +1135,8 @@ def eval_seg(pred,true_mask_p,threshold):
         # return eiou / len(threshold), edice / len(threshold)
         iou_d, iou_c, disc_dice, cup_dice = 0,0,0,0
         for i in range(b):
-            pred = pred[i]
-            mask = true_mask_p[i]
+            pred = pred[i].cpu().detach().numpy().astype('int32')
+            mask = true_mask_p[i].cpu().detach().numpy().astype('int32')
 
             for j in range(c):
                 pred_mask = (pred > j).float()
