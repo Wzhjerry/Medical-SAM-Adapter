@@ -25,9 +25,10 @@ class ODOC(Dataset):
         self.args.size = 1024
         self.args.sub_data = [
             "G1020", 
-            "GAMMA - task3", 
-            "ORIGA", 
-            "Papila", 
+            # "GAMMA - task3", 
+            # "ORIGA", 
+            # "Papila",
+            # "Refuge",
         ]
 
         self.x, self.y, self.names = self.load_name(args, split)
