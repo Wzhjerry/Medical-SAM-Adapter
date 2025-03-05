@@ -1079,8 +1079,8 @@ def eval_seg(pred,true_mask_p,threshold):
             mask_numpy = mask.cpu().detach().numpy().astype(np.uint8)
 
             for j in range(c):
-                pred_mask = (pred_numpy > j).astype(np.uint8)
-                mask = (mask_numpy > j).astype(np.uint8)
+                pred_mask = (pred_numpy == j).astype(np.uint8)
+                mask = (mask_numpy == j).astype(np.uint8)
                 iou = jc(pred_mask, mask)
                 dice = dc(pred_mask, mask)
                 if j == 0:
