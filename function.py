@@ -200,8 +200,6 @@ def train_sam(args, net: nn.Module, optimizer, train_loader,
                 
             # Resize to the ordered output size
             pred = F.interpolate(pred, size=(args.out_size,args.out_size))
-            print("Pred size:", pred.size(), "Mask size:", masks.size())
-
             loss = lossfunc(pred, masks)
 
             pbar.set_postfix(**{'loss (batch)': loss.item()})
@@ -252,7 +250,7 @@ def validation_sam(args, val_loader, epoch, net: nn.Module, clean_dir=True):
     with tqdm(total=n_val, desc='Validation round', unit='batch', leave=False) as pbar:
         for ind, pack in enumerate(val_loader):
             imgsw = pack['image'].to(dtype = torch.float32, device = GPUdevice)
-            masksw = pack['label'].to(dtype = torch.float32, device = GPUdevice)
+            masksw = pack['label'].to(dtype = torch.long, device = GPUdevice)
             # for k,v in pack['image_meta_dict'].items():
             #     print(k)
             if 'pt' not in pack or args.thd:

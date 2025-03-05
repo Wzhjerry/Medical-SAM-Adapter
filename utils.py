@@ -1051,26 +1051,44 @@ def eval_seg(pred,true_mask_p,threshold):
     b, c, h, w = pred.size()
     if c == 2:
         iou_d, iou_c, disc_dice, cup_dice = 0,0,0,0
-        for th in threshold:
+        # for th in threshold:
 
-            gt_vmask_p = (true_mask_p > th).float()
-            vpred = (pred > th).float()
-            vpred_cpu = vpred.cpu()
-            disc_pred = vpred_cpu[:,0,:,:].numpy().astype('int32')
-            cup_pred = vpred_cpu[:,1,:,:].numpy().astype('int32')
+        #     gt_vmask_p = (true_mask_p > th).float()
+        #     vpred = (pred > th).float()
+        #     vpred_cpu = vpred.cpu()
+        #     disc_pred = vpred_cpu[:,0,:,:].numpy().astype('int32')
+        #     cup_pred = vpred_cpu[:,1,:,:].numpy().astype('int32')
 
-            disc_mask = gt_vmask_p [:,0,:,:].squeeze(1).cpu().numpy().astype('int32')
-            cup_mask = gt_vmask_p [:, 1, :, :].squeeze(1).cpu().numpy().astype('int32')
+        #     disc_mask = gt_vmask_p [:,0,:,:].squeeze(1).cpu().numpy().astype('int32')
+        #     cup_mask = gt_vmask_p [:, 1, :, :].squeeze(1).cpu().numpy().astype('int32')
     
-            '''iou for numpy'''
-            iou_d += iou(disc_pred,disc_mask)
-            iou_c += iou(cup_pred,cup_mask)
+        #     '''iou for numpy'''
+        #     iou_d += jc(disc_pred,disc_mask)
+        #     iou_c += jc(cup_pred,cup_mask)
 
-            '''dice for torch'''
-            disc_dice += dice_coeff(vpred[:,0,:,:], gt_vmask_p[:,0,:,:]).item()
-            cup_dice += dice_coeff(vpred[:,1,:,:], gt_vmask_p[:,1,:,:]).item()
+        #     '''dice for torch'''
+        #     # disc_dice += dice_coeff(vpred[:,0,:,:], gt_vmask_p[:,0,:,:]).item()
+        #     # cup_dice += dice_coeff(vpred[:,1,:,:], gt_vmask_p[:,1,:,:]).item()
+        #     disc_dice += dc(disc_pred, disc_mask)
+        #     cup_dice += dc(cup_pred, cup_mask)
+        for i in range(b):
+            pred = pred[i]
+            mask = true_mask_p[i]
+
+            for j in range(c):
+                pred_mask = (pred > j).float()
+                mask = (mask > j).float()
+                iou = jc(pred_mask, mask)
+                dice = dc(pred_mask, mask)
+                if j == 0:
+                    iou_d += iou
+                    disc_dice += dice
+                else:
+                    iou_c += iou
+                    cup_dice += dice
             
-        return iou_d / len(threshold), iou_c / len(threshold), disc_dice / len(threshold), cup_dice / len(threshold)
+        return iou_d / b, iou_c / b, disc_dice / b, cup_dice / b
+
     elif c > 2: # for multi-class segmentation > 2 classes
         ious = [0] * c
         dices = [0] * c
