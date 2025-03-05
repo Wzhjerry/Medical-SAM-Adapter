@@ -103,7 +103,7 @@ def main():
             else:
                 tol, (eiou_cup, eiou_disc, edice_cup, edice_disc) = function.validation_sam(args, nice_test_loader, epoch, net, writer)
                 logger.info(f'Total score: {tol}, IOU_CUP: {eiou_cup}, IOU_DISC: {eiou_disc}, DICE_CUP: {edice_cup}, DICE_DISC: {edice_disc} || @ epoch {epoch}.')
-
+                edice = (edice_cup + edice_disc) / 2
         net.train()
         time_start = time.time()
         loss = function.train_sam(args, net, optimizer, nice_train_loader, epoch, writer, vis = args.vis)
@@ -124,6 +124,7 @@ def main():
                 sd = net.module.state_dict()
             else:
                 sd = net.state_dict()
+
 
             if edice > best_dice:
                 best_tol = tol
