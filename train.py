@@ -97,7 +97,7 @@ def main():
     for epoch in range(settings.EPOCH):
 
         if epoch and epoch < 5:
-            if args.dataset != 'REFUGE':
+            if args.dataset != 'odoc':
                 tol, (eiou, edice) = function.validation_sam(args, nice_test_loader, epoch, net, writer)
                 logger.info(f'Total score: {tol}, IOU: {eiou}, DICE: {edice} || @ epoch {epoch}.')
             else:
@@ -113,7 +113,7 @@ def main():
 
         net.eval()
         if epoch and epoch % args.val_freq == 0 or epoch == settings.EPOCH-1:
-            if args.dataset != 'REFUGE':
+            if args.dataset != 'odoc':
                 tol, (eiou, edice) = function.validation_sam(args, nice_test_loader, epoch, net, writer)
                 logger.info(f'Total score: {tol}, IOU: {eiou}, DICE: {edice} || @ epoch {epoch}.')
             else:
