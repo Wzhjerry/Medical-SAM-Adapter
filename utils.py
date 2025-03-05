@@ -1108,31 +1108,49 @@ def eval_seg(pred,true_mask_p,threshold):
             
         return tuple(np.array(ious + dices) / len(threshold)) # tuple has a total number of c * 2
     else:
-        eiou, edice = 0,0
-        for th in threshold:
+        # eiou, edice = 0,0
+        # for th in threshold:
 
-            gt_vmask_p = (true_mask_p > th).float()
-            vpred = (pred > th).float()
-            vpred_cpu = vpred.cpu()
-            disc_pred = vpred_cpu[:,0,:,:].numpy().astype('int32')
+        #     gt_vmask_p = (true_mask_p > th).float()
+        #     vpred = (pred > th).float()
+        #     vpred_cpu = vpred.cpu()
+        #     disc_pred = vpred_cpu[:,0,:,:].numpy().astype('int32')
 
-            disc_mask = gt_vmask_p [:,0,:,:].squeeze(1).cpu().numpy().astype('int32')
+        #     disc_mask = gt_vmask_p [:,0,:,:].squeeze(1).cpu().numpy().astype('int32')
     
-            dsc = dc(disc_pred, disc_mask)
-            iou = jc(disc_pred, disc_mask)
-            if not dsc == 1 and not dsc == 0:
-                '''iou for numpy'''
-                eiou += iou
+        #     dsc = dc(disc_pred, disc_mask)
+        #     iou = jc(disc_pred, disc_mask)
+        #     if not dsc == 1 and not dsc == 0:
+        #         '''iou for numpy'''
+        #         eiou += iou
 
-                '''dice for torch'''
-                edice += dsc
-            # '''iou for numpy'''
-            # eiou += iou(disc_pred,disc_mask)
+        #         '''dice for torch'''
+        #         edice += dsc
+        #     # '''iou for numpy'''
+        #     # eiou += iou(disc_pred,disc_mask)
 
-            # '''dice for torch'''
-            # edice += dice_coeff(vpred[:,0,:,:], gt_vmask_p[:,0,:,:]).item()
+        #     # '''dice for torch'''
+        #     # edice += dice_coeff(vpred[:,0,:,:], gt_vmask_p[:,0,:,:]).item()
             
-        return eiou / len(threshold), edice / len(threshold)
+        # return eiou / len(threshold), edice / len(threshold)
+        iou_d, iou_c, disc_dice, cup_dice = 0,0,0,0
+        for i in range(b):
+            pred = pred[i]
+            mask = true_mask_p[i]
+
+            for j in range(c):
+                pred_mask = (pred > j).float()
+                mask = (mask > j).float()
+                iou = jc(pred_mask, mask)
+                dice = dc(pred_mask, mask)
+                if j == 0:
+                    iou_d += iou
+                    disc_dice += dice
+                else:
+                    iou_c += iou
+                    cup_dice += dice
+            
+        return iou_d / b, iou_c / b, disc_dice / b, cup_dice / b
 
 # @objectives.wrap_objective()
 def dot_compare(layer, batch=1, cossim_pow=0):
