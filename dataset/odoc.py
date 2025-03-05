@@ -88,7 +88,7 @@ class ODOC(Dataset):
         im_t = self.im_transform(image)
         torch.manual_seed(seed)
         random.seed(seed)
-        target_t = self.label_transform(mask).int()
+        target_t = self.label_transform(mask)
         torch.manual_seed(seed)
         random.seed(seed)
 
@@ -96,7 +96,7 @@ class ODOC(Dataset):
 
         return {
             'image': im_t,              # Transformed image (tensor)
-            'label': torch.squeeze(target_t),          # Transformed multi-class mask (tensor)
+            'label': torch.squeeze(target_t).long(),          # Transformed multi-class mask (tensor)
             'p_label': point_label,  # Tensor of point labels (num_classes,)
             'pt': pt,            # Tensor of points (num_classes, 2)
             'image_meta_dict': image_meta_dict,
