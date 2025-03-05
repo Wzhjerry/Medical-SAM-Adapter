@@ -357,11 +357,11 @@ def validation_sam(args, val_loader, epoch, net: nn.Module, clean_dir=True):
                     # Resize to the ordered output size
                     pred = F.interpolate(pred, size=(args.out_size,args.out_size))
                     tot += lossfunc(pred, masks)
-                    _, c, _, _= pred.size()
-                    if c == 2:
-                        pred = torch.argmax(pred, dim=1, keepdim=True)
-                    else:
-                        pred = (pred > 0.5).float()
+                    # _, c, _, _= pred.size()
+                    # if c == 2:
+                    #     pred = torch.argmax(pred, dim=1, keepdim=True)
+                    # else:
+                    #     pred = (pred > 0.5).float()
 
                     # for idx, name in enumerate(names):
                     #     save_path = os.path.join('/data/wangzh/medsam-adapter/visual', args.exp_name)
