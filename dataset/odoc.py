@@ -75,7 +75,9 @@ class ODOC(Dataset):
         mask_tensor[0][np.where(mask_point > 0)] = 255
         mask_tensor[1][np.where(mask_point > 1)] = 255
         mask_point[mask_point > 0] = 1
+        mask_tensor = cv2.resize(mask_tensor, (256, 256), interpolation=cv2.INTER_NEAREST)
         mask_tensor = torch.from_numpy(mask_tensor).float()
+
         pts = []
         point_labels = []
         for _ in range(3):  # Generate 3 points
@@ -93,9 +95,9 @@ class ODOC(Dataset):
         im_t = self.im_transform(image)
         torch.manual_seed(seed)
         random.seed(seed)
-        target_t = self.label_transform(mask)
-        torch.manual_seed(seed)
-        random.seed(seed)
+        # target_t = self.label_transform(mask)
+        # torch.manual_seed(seed)
+        # random.seed(seed)
 
         image_meta_dict = {'filename_or_obj': self.names[idx]}
 
