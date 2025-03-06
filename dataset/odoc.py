@@ -71,6 +71,7 @@ class ODOC(Dataset):
         mask_oc = Image.fromarray(mask_oc).convert('L')
         mask_oc = self.label_transform(mask_oc)
         mask_tensor = torch.stack([mask_od, mask_oc], dim=0).squeeze()
+        print(mask_tensor.shape)
 
         pts = []
         point_labels = []
