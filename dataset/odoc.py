@@ -55,7 +55,7 @@ class ODOC(Dataset):
         point_label = 1
 
         image = Image.open(self.x[idx]).convert('RGB')
-        mask = cv2.imread(self.y[idx])
+        mask = cv2.imread(self.y[idx])[..., 0]
         mask = cv2.resize(mask, (1024, 1024), interpolation=cv2.INTER_NEAREST)
 
         mask_point = np.array(mask).astype(np.uint8)
@@ -65,6 +65,8 @@ class ODOC(Dataset):
         mask_tensor[1][np.where(mask_point > 128)] = 255
         mask_point[mask_point > 0] = 1
 
+        mask_tensor = torch.from_numpy(mask_tensor).float()
+        mask_tensor = F.interpolate(mask_tensor, (1024, 1024), mode='nearest')
 
         pts = []
         point_labels = []
@@ -91,7 +93,7 @@ class ODOC(Dataset):
 
         return {
             'image': im_t,              # Transformed image (tensor)
-            'label': resized_mask_tensor,          # Transformed multi-class mask (tensor)
+            'label': mask_tensor,          # Transformed multi-class mask (tensor)
             'p_label': point_label,  # Tensor of point labels (num_classes,)
             'pt': pt,            # Tensor of points (num_classes, 2)
             'image_meta_dict': image_meta_dict,
