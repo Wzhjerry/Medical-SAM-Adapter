@@ -1072,25 +1072,18 @@ def eval_seg(pred,true_mask_p,threshold):
         #     disc_dice += dc(disc_pred, disc_mask)
         #     cup_dice += dc(cup_pred, cup_mask)
         for i in range(b):
-            pred = pred[i]
-            mask = true_mask_p[i]
+            pred = pred[i].cpu().detach().numpy().astype(np.uint8)
+            mask = true_mask_p[i].cpu().detach().numpy().astype(np.uint8)
 
-            pred_numpy = pred.cpu().detach().numpy().astype(np.uint8)
-            mask_numpy = mask.cpu().detach().numpy().astype(np.uint8)
+            disc_pred = pred[0]
+            cup_pred = pred[1]
+            disc_mask = mask[0]
+            cup_mask = mask[1]
 
-            pred_numpy = (pred_numpy > 0.5).astype(np.uint8)
-
-            for j in range(c):
-                pred_mask = pred_numpy[j]
-                mask = (mask_numpy == j).astype(np.uint8)
-                iou = jc(pred_mask, mask)
-                dice = dc(pred_mask, mask)
-                if j == 0:
-                    iou_d += iou
-                    disc_dice += dice
-                else:
-                    iou_c += iou
-                    cup_dice += dice
+            iou_d += jc(disc_pred, disc_mask)
+            iou_c += jc(cup_pred, cup_mask)
+            disc_dice += dc(disc_pred, disc_mask)
+            cup_dice += dc(cup_pred, cup_mask)
             
         return iou_d / b, iou_c / b, disc_dice / b, cup_dice / b
 
