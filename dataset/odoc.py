@@ -73,7 +73,7 @@ class ODOC(Dataset):
 
         mask_tensor = np.zeros((2, 1024, 1024))
         mask_tensor[0][np.where(mask_point > 0)] = 255
-        mask_tensor[1][np.where(mask_point > 1)] = 255
+        mask_tensor[1][np.where(mask_point > 128)] = 255
         mask_point[mask_point > 0] = 1
         resized_mask_tensor = np.zeros((2, 256, 256))
         for i in range(mask_tensor.shape[0]):
