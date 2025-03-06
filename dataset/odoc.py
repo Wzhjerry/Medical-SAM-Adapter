@@ -10,7 +10,8 @@ from tqdm import tqdm
 # from datasets.utils import analyze_name
 from utils import random_box, random_click, build_transform, remove_black_edge, random_box
 from sklearn.model_selection import KFold
-from torchvision.transforms import functional as F
+# from torchvision.transforms import functional as F
+import torch.nn.functional as F
 import pandas as pd
 
 
