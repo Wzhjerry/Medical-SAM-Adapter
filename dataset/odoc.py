@@ -63,11 +63,11 @@ class ODOC(Dataset):
         mask_point[np.where(mask > 0)] = 1
 
         mask_od = np.zeros_like(mask, dtype=np.uint8)
-        mask_od[np.where(mask > 0)] = 1
+        mask_od[np.where(mask > 0)] = 255
         mask_od = cv2.resize(mask_od, (256, 256), interpolation=cv2.INTER_NEAREST)
         mask_tensor_od = torch.from_numpy(mask_od).float()
         mask_oc = np.zeros_like(mask, dtype=np.uint8)
-        mask_oc[np.where(mask > 128)] = 1
+        mask_oc[np.where(mask > 128)] = 255
         mask_oc = cv2.resize(mask_oc, (256, 256), interpolation=cv2.INTER_NEAREST)
         mask_tensor_oc = torch.from_numpy(mask_oc).float()
         mask_tensor = torch.stack([mask_tensor_od, mask_tensor_oc], dim=0)
