@@ -53,21 +53,10 @@ class ODOC(Dataset):
     def __getitem__(self, idx):
         # BGR -> RGB -> PIL
         point_label = 1
-        # image = cv2.imread(self.x[idx])[..., ::-1]
-        # image, ymin, ymax, xmin, xmax = remove_black_edge(image)
-        # image = cv2.resize(image, (1024, 1024), interpolation=cv2.INTER_CUBIC)
-        # # Name
-        # name = self.names[idx]
-        # # Label
-        # label = self.read_labels(self.y[idx], name, ymin, ymax, xmin, xmax, self.split)
-        
-        # im = Image.fromarray(np.uint8(image)).convert('RGB')
 
         image = Image.open(self.x[idx]).convert('RGB')
-        mask = Image.open(self.y[idx]).convert('L')
-
-        newsize = (1024, 1024)
-        mask = mask.resize(newsize)
+        mask = cv2.imread(self.y[idx])
+        mask = cv2.resize(mask, (1024, 1024), interpolation=cv2.INTER_NEAREST)
 
         mask_point = np.array(mask).astype(np.uint8)
 
@@ -75,11 +64,7 @@ class ODOC(Dataset):
         mask_tensor[0][np.where(mask_point > 0)] = 255
         mask_tensor[1][np.where(mask_point > 128)] = 255
         mask_point[mask_point > 0] = 1
-        resized_mask_tensor = np.zeros((2, 256, 256))
-        for i in range(mask_tensor.shape[0]):
-            resized_mask_tensor[i] = cv2.resize(mask_tensor[i], (256, 256), interpolation=cv2.INTER_NEAREST)
 
-        resized_mask_tensor = torch.from_numpy(resized_mask_tensor).float()
 
         pts = []
         point_labels = []
