@@ -75,8 +75,7 @@ class ODOC(Dataset):
         mask_tensor[0][np.where(mask_point > 0)] = 255
         mask_tensor[1][np.where(mask_point > 1)] = 255
         mask_point[mask_point > 0] = 1
-        mask_tensor = Image.fromarray(np.uint8(mask_tensor)).convert('L')
-
+        mask_tensor = torch.from_numpy(mask_tensor).float()
         pts = []
         point_labels = []
         for _ in range(3):  # Generate 3 points
