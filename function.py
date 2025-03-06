@@ -200,7 +200,9 @@ def train_sam(args, net: nn.Module, optimizer, train_loader,
                 
             # Resize to the ordered output size
             pred = F.interpolate(pred, size=(args.out_size,args.out_size))
-            loss = lossfunc(pred, masks)
+            loss_d = lossfunc(pred[:, 0, :, :], masks[:, 0, :, :])
+            loss_c = lossfunc(pred[:, 1, :, :], masks[:, 1, :, :])
+            loss = loss_d + loss_c
 
             pbar.set_postfix(**{'loss (batch)': loss.item()})
             epoch_loss += loss.item()
