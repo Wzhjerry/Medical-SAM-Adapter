@@ -71,7 +71,6 @@ class ODOC(Dataset):
         mask_oc = cv2.resize(mask_oc, (256, 256), interpolation=cv2.INTER_NEAREST)
         mask_tensor_oc = torch.from_numpy(mask_oc).float()
         mask_tensor = torch.stack([mask_tensor_od, mask_tensor_oc], dim=0)
-        print(mask_tensor.shape)
 
         pts = []
         point_labels = []
