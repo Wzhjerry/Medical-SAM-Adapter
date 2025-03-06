@@ -58,7 +58,6 @@ class ODOC(Dataset):
         image = Image.open(self.x[idx]).convert('RGB')
         mask = cv2.imread(self.y[idx])[..., 0]
         mask = cv2.resize(mask, (1024, 1024), interpolation=cv2.INTER_NEAREST)
-        print(np.unique(mask))
 
         mask_point = np.zeros_like(mask, dtype=np.uint8)
         mask_point[np.where(mask > 0)] = 1
