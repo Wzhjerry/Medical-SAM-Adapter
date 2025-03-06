@@ -1042,7 +1042,7 @@ def vis_image(imgs, pred_masks, gt_masks, save_path, reverse = False, points = N
 
     return
 
-def eval_seg(pred,true_mask_p,threshold):
+def eval_seg(pred, true_mask_p, threshold):
     '''
     threshold: a int or a tuple of int
     masks: [b,2,h,w]
@@ -1075,10 +1075,8 @@ def eval_seg(pred,true_mask_p,threshold):
             pred_numpy = pred[i].cpu().detach().numpy().astype(np.uint8)
             mask_numpy = true_mask_p[i].cpu().detach().numpy().astype(np.uint8)
 
-            pred_numpy = (pred_numpy > 0.5).astype(np.uint8)
-
-            disc_pred = pred_numpy[0]
-            cup_pred = pred_numpy[1]
+            disc_pred = np.round(pred_numpy[0])
+            cup_pred = np.round(pred_numpy[1])
             disc_mask = mask_numpy[0]
             cup_mask = mask_numpy[1]
 
