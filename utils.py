@@ -1085,7 +1085,7 @@ def eval_seg(pred,true_mask_p,threshold):
             disc_dice += dc(disc_pred, disc_mask)
             cup_dice += dc(cup_pred, cup_mask)
             
-        return iou_d / b, iou_c / b, disc_dice / b, cup_dice / b
+        return iou_d, iou_c, disc_dice, cup_dice
 
     else:
         # eiou, edice = 0,0
