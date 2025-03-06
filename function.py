@@ -43,7 +43,7 @@ from utils import *
 args = cfg.parse_args()
 
 GPUdevice = torch.device('cuda', args.gpu_device)
-pos_weight = torch.ones([1]).cuda(device=GPUdevice)*2
+pos_weight = torch.ones([1]).cuda(device=GPUdevice)
 criterion_G = torch.nn.BCEWithLogitsLoss(pos_weight=pos_weight)
 # criterion_G = torch.nn.CrossEntropyLoss()
 seed = torch.randint(1,11,(args.b,7))
@@ -250,7 +250,7 @@ def validation_sam(args, val_loader, epoch, net: nn.Module, clean_dir=True):
     with tqdm(total=n_val, desc='Validation round', unit='batch', leave=False) as pbar:
         for ind, pack in enumerate(val_loader):
             imgsw = pack['image'].to(dtype = torch.float32, device = GPUdevice)
-            masksw = pack['label'].to(dtype = torch.long, device = GPUdevice)
+            masksw = pack['label'].to(dtype = torch.float32, device = GPUdevice)
             # for k,v in pack['image_meta_dict'].items():
             #     print(k)
             if 'pt' not in pack or args.thd:
