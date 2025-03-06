@@ -1078,6 +1078,8 @@ def eval_seg(pred,true_mask_p,threshold):
             pred_numpy = pred.cpu().detach().numpy().astype(np.uint8)
             mask_numpy = mask.cpu().detach().numpy().astype(np.uint8)
 
+            pred_numpy = (pred_numpy > 0.5).astype(np.uint8)
+
             for j in range(c):
                 pred_mask = pred_numpy[j]
                 mask = (mask_numpy == j).astype(np.uint8)
@@ -1092,24 +1094,6 @@ def eval_seg(pred,true_mask_p,threshold):
             
         return iou_d / b, iou_c / b, disc_dice / b, cup_dice / b
 
-    elif c > 2: # for multi-class segmentation > 2 classes
-        ious = [0] * c
-        dices = [0] * c
-        for th in threshold:
-            gt_vmask_p = (true_mask_p > th).float()
-            vpred = (pred > th).float()
-            vpred_cpu = vpred.cpu()
-            for i in range(0, c):
-                pred = vpred_cpu[:,i,:,:].numpy().astype('int32')
-                mask = gt_vmask_p[:,i,:,:].squeeze(1).cpu().numpy().astype('int32')
-        
-                '''iou for numpy'''
-                ious[i] += iou(pred,mask)
-
-                '''dice for torch'''
-                dices[i] += dice_coeff(vpred[:,i,:,:], gt_vmask_p[:,i,:,:]).item()
-            
-        return tuple(np.array(ious + dices) / len(threshold)) # tuple has a total number of c * 2
     else:
         # eiou, edice = 0,0
         # for th in threshold:
