@@ -75,7 +75,7 @@ class ODOC(Dataset):
         mask_tensor[0][np.where(mask_point > 0)] = 255
         mask_tensor[1][np.where(mask_point > 1)] = 255
         mask_point[mask_point > 0] = 1
-        mask_tensor = cv2.resize(mask_tensor, (256, 256), interpolation=cv2.INTER_NEAREST)
+        mask_tensor = cv2.resize(mask_tensor, (2, 256, 256), interpolation=cv2.INTER_NEAREST)
         mask_tensor = torch.from_numpy(mask_tensor).float()
 
         pts = []
