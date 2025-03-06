@@ -1077,9 +1077,7 @@ def eval_seg(pred, true_mask_p, threshold):
             mask_numpy = true_mask_p[i].cpu().detach().numpy().astype(np.uint8)
 
             disc_pred = np.round(pred_numpy[0])
-            print(np.unique(disc_pred))
             cup_pred = np.round(pred_numpy[1])
-            print(np.unique(cup_pred))
             disc_mask = mask_numpy[0]
             cup_mask = mask_numpy[1]
 
