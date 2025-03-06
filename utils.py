@@ -1074,7 +1074,6 @@ def eval_seg(pred, true_mask_p, threshold):
         for i in range(b):
             vpred = (pred[i] > 0.5).float()
             pred_numpy = vpred.cpu().detach().numpy().astype(np.uint8)
-            print(np.unique(pred_numpy))
             mask_numpy = true_mask_p[i].cpu().detach().numpy().astype(np.uint8)
 
             disc_pred = np.round(pred_numpy[0])
@@ -1089,7 +1088,7 @@ def eval_seg(pred, true_mask_p, threshold):
             disc_dice += dc(disc_pred, disc_mask)
             cup_dice += dc(cup_pred, cup_mask)
             
-        return iou_d, iou_c, disc_dice, cup_dice
+        return iou_d / b, iou_c / b, disc_dice / b, cup_dice / b
 
     else:
         # eiou, edice = 0,0
