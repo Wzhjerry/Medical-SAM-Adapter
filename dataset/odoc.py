@@ -67,7 +67,7 @@ class ODOC(Dataset):
         mask_point[mask_point > 0] = 1
 
         mask_tensor = torch.from_numpy(mask_tensor).float()
-        mask_tensor = F.interpolate(mask_tensor, (2, 256, 256), mode='nearest')
+        mask_tensor = F.interpolate(mask_tensor.unsqueeze(0), size=(256, 256), mode='nearest').squeeze(0)
 
         pts = []
         point_labels = []
